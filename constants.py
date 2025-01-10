@@ -70,6 +70,13 @@ class Subsystems:
     kMultiTagStandardDeviations: tuple[float, ...] = (0.5, 0.5, 1.0)
     kMaxPoseAmbiguity: units.percent = 0.2
 
+  class Roller: 
+    kRollerMotorCANId: int = 10
+    kRollerMotorPID = PID(0.075, 0, 0)
+    kRollerMotorVComp: float = 10.0
+    kRollerMotorCurrentLimit: float = 60.0
+    kRollerMotorEjectSpeed: float = 0.44
+
 class Sensors:
   class Gyro:
     class NAVX2:
