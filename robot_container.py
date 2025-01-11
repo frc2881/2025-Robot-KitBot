@@ -9,6 +9,7 @@ from commands.game_commands import GameCommands
 from subsystems.drive_subsystem import DriveSubsystem
 from subsystems.localization_subsystem import LocalizationSubsystem
 import constants
+from subsystems.roller_subsystem import RollerSubsystem
 
 class RobotContainer:
   def __init__(self) -> None:
@@ -26,6 +27,7 @@ class RobotContainer:
     
   def _setupSubsystems(self) -> None:
     self.driveSubsystem = DriveSubsystem(self.gyroSensor.getHeading)
+    self.rollerSubsystem = RollerSubsystem()
     self.localizationSubsystem = LocalizationSubsystem(self.poseSensors, self.gyroSensor.getRotation, self.driveSubsystem.getModulePositions)
     
   def _setupControllers(self) -> None:
@@ -47,7 +49,6 @@ class RobotContainer:
 
     self.rollerSubsystem.setDefaultCommand(
       self.rollerSubsystem.rollerCommand(
-        self.rollerSubsystem,
         getForward = self.driverController.getRightTriggerAxis,
         getReverse = self.driverController.getLeftTriggerAxis,
     ))

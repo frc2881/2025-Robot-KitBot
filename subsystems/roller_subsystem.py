@@ -16,8 +16,8 @@ from rev import SparkMax, SparkMaxConfig, SparkBase
 
 class RollerSubsystem(Subsystem):
     def __init__(self):
-        super()._init_()
-        self._rollerMotor = SparkMax(constants.Subystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
+        super().__init__()
+        self._rollerMotor = SparkMax(constants.Subsystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
 
         self.sparkConfig = SparkMaxConfig()
         self.sparkConfig.voltageCompensation(constants.Subsystems.Roller.kRollerMotorVComp)
