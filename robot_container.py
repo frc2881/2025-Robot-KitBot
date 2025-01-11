@@ -28,7 +28,7 @@ class RobotContainer:
   def _setupSubsystems(self) -> None:
     self.driveSubsystem = DriveSubsystem(self.gyroSensor.getHeading)
     self.localizationSubsystem = LocalizationSubsystem(self.poseSensors, self.gyroSensor.getRotation, self.driveSubsystem.getModulePositions)
-    self.rollersubsystem = RollerSubsystem()
+    self.rollerSubsystem = RollerSubsystem()
     
   def _setupControllers(self) -> None:
     self.driverController = GameController(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
@@ -48,17 +48,17 @@ class RobotContainer:
     ))
 
     self.rollerSubsystem.setDefaultCommand(
-      self.rollerSubsystem.runRoller(
+      self.rollerSubsystem.rollerCommand(
         self.rollerSubsystem,
-        self.driverController.getRightTriggerAxis,
-        self.driverController.getLeftTriggerAxis,
+        getForward = self.driverController.getRightTriggerAxis,
+        getReverse = self.driverController.getLeftTriggerAxis,
     ))
 
     self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand())
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
-    self.driverController.rightTrigger().whileTrue(self.rollersubsystem.forwardRoller())
+    # self.driverController.rightTrigger().whileTrue(self.rollersubsystem.forwardRoller())
     # self.driverController.rightBumper().whileTrue(cmd.none())
-    self.driverController.leftTrigger().whileTrue(self.rollersubsystem.reverseRoller())
+    # self.driverController.leftTrigger().whileTrue(self.rollersubsystem.reverseRoller())
     # self.driverController.leftBumper().whileTrue(cmd.none())
     # self.driverController.povUp().whileTrue(cmd.none())
     # self.driverController.povDown().whileTrue(cmd.none())

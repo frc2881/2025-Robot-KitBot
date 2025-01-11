@@ -4,7 +4,7 @@ from wpimath import units
 import constants
 from rev import SparkMax, SparkMaxConfig, SparkBase
 
-class RollerSubsystem(Subsystem):
+class RollerSubsystem:
     def __init__(self):
         super().__init__()
         self._rollerMotor = SparkMax (constants.Subsystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
@@ -16,9 +16,9 @@ class RollerSubsystem(Subsystem):
     
     def rollerCommand(
         self, 
-        getInputX: Callable[[], units.percent], 
-        getInputY: Callable[[], units.percent] 
+        getForward: Callable[[], units.percent], 
+        getReverse: Callable[[], units.percent] 
         ) -> Command:
         return self.run(
-        lambda: self._rollerMotor.set(getInputX() - getInputY())
+        lambda: self._rollerMotor.set(getForward() - getReverse())
         ).withName("RollerSubsystem:Roller")
