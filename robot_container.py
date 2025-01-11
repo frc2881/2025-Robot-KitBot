@@ -49,7 +49,6 @@ class RobotContainer:
 
     self.rollerSubsystem.setDefaultCommand(
       self.rollerSubsystem.rollerCommand(
-        self.rollerSubsystem,
         getForward = self.driverController.getRightTriggerAxis,
         getReverse = self.driverController.getLeftTriggerAxis,
     ))

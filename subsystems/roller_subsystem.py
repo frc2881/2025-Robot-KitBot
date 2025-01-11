@@ -4,7 +4,7 @@ from wpimath import units
 import constants
 from rev import SparkMax, SparkMaxConfig, SparkBase
 
-class RollerSubsystem:
+class RollerSubsystem (Subsystem):
     def __init__(self):
         super().__init__()
         self._rollerMotor = SparkMax (constants.Subsystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)

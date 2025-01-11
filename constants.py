@@ -74,7 +74,7 @@ class Subsystems:
     kRollerMotorCANId: int = 10
     kRollerMotorPID = PID(0.075, 0, 0)
     kRollerMotorVComp: float = 10.0
-    kRollerMotorCurrentLimit: float = 60.0
+    kRollerMotorCurrentLimit: int = 60
     kRollerMotorEjectSpeed: float = 0.44
 
 class Sensors:
