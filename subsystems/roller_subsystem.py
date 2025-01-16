@@ -18,12 +18,11 @@ class RollerSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
         self._rollerMotor = SparkMax(constants.Subsystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
-
         self.sparkConfig = SparkMaxConfig()
         self.sparkConfig.voltageCompensation(constants.Subsystems.Roller.kRollerMotorVComp)
         self.sparkConfig.smartCurrentLimit(constants.Subsystems.Roller.kRollerMotorCurrentLimit)
-        self._rollerMotor.configure(self.sparkConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters)
-
+        utils.setSparkConfig(self._rollerMotor.configure(self.sparkConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters))
+        
     def rollerCommand(
             self, 
             getForward: Callable[[], units.percent], 

@@ -49,8 +49,8 @@ class RobotContainer:
 
     self.rollerSubsystem.setDefaultCommand(
       self.rollerSubsystem.rollerCommand(
-        getForward = self.driverController.getRightTriggerAxis,
-        getReverse = self.driverController.getLeftTriggerAxis,
+        lambda: utils.squareControllerInput(self.driverController.getRightTriggerAxis(), 0.05),
+        lambda: utils.squareControllerInput(self.driverController.getLeftTriggerAxis(), 0.05),
     ))
 
     self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand())
