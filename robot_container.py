@@ -10,6 +10,7 @@ from subsystems.drive_subsystem import DriveSubsystem
 from subsystems.localization_subsystem import LocalizationSubsystem
 import constants
 from subsystems.roller_subsystem import RollerSubsystem
+from wpimath.geometry import Pose2d
 
 class RobotContainer:
   def __init__(self) -> None:
@@ -47,18 +48,18 @@ class RobotContainer:
         self.driverController.getRightX
     ))
 
-    self.rollerSubsystem.setDefaultCommand(
-      self.rollerSubsystem.rollerCommand(
-        lambda: utils.squareControllerInput(self.driverController.getRightTriggerAxis(), 0.05),
-        lambda: utils.squareControllerInput(self.driverController.getLeftTriggerAxis(), 0.05),
-    ))
+    # self.rollerSubsystem.setDefaultCommand(
+    #   self.rollerSubsystem.rollerCommand(
+    #     lambda: utils.squareControllerInput(self.driverController.getRightTriggerAxis(), 0.05),
+    #     lambda: utils.squareControllerInput(self.driverController.getLeftTriggerAxis(), 0.05),
+    # ))
 
     self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand())
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
     # self.driverController.rightTrigger().whileTrue(cmd.none())
     # self.driverController.rightBumper().whileTrue(cmd.none())
     # self.driverController.leftTrigger().whileTrue(cmd.none())
-    # self.driverController.leftBumper().whileTrue(cmd.none())
+    self.driverController.leftBumper().whileTrue(self.localizationSubsystem.run(lambda: self.localizationSubsystem.resetPose(Pose2d())))
     # self.driverController.povUp().whileTrue(cmd.none())
     # self.driverController.povDown().whileTrue(cmd.none())
     # self.driverController.povLeft().whileTrue(cmd.none())
