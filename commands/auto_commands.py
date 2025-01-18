@@ -43,9 +43,7 @@ class AutoCommands:
     return self._autoCommandChooser.getSelected()()
 
   def _move(self, path: AutoPath) -> Command:
-    return AutoBuilder.pathfindThenFollowPath(
-      self._paths.get(path), 
-      constants.Subsystems.Drive.kPathFindingConstraints
+    return AutoBuilder.followPath(self._paths.get(path) 
     ).withTimeout(
       constants.Game.Commands.kAutoMoveTimeout
     )
