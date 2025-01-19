@@ -29,7 +29,12 @@ class RobotContainer:
   def _setupSubsystems(self) -> None:
     self.driveSubsystem = DriveSubsystem(self.gyroSensor.getHeading)
     self.rollerSubsystem = RollerSubsystem()
-    self.localizationSubsystem = LocalizationSubsystem(self.poseSensors, self.gyroSensor.getRotation, self.driveSubsystem.getModulePositions)
+    self.localizationSubsystem = LocalizationSubsystem(
+      self.poseSensors, 
+      self.gyroSensor.getRotation, 
+      self.driveSubsystem.getModulePositions, 
+      self.gyroSensor.resetRobotToField
+      )
     
   def _setupControllers(self) -> None:
     self.driverController = GameController(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
@@ -58,7 +63,7 @@ class RobotContainer:
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
     # self.driverController.rightTrigger().whileTrue(cmd.none())
     # self.driverController.rightBumper().whileTrue(cmd.none())
-    # self.driverController.leftTrigger().whileTrue(cmd.none())
+    self.driverController.leftTrigger().whileTrue(self.rollerSubsystem.ejectCommand())
     self.driverController.leftBumper().whileTrue(self.localizationSubsystem.run(lambda: self.localizationSubsystem.resetPose(Pose2d())))
     # self.driverController.povUp().whileTrue(cmd.none())
     # self.driverController.povDown().whileTrue(cmd.none())

@@ -17,18 +17,18 @@ from rev import SparkMax, SparkMaxConfig, SparkBase
 class RollerSubsystem(Subsystem):
     def __init__(self):
         super().__init__()
-        self._rollerMotor = SparkMax(constants.Subsystems.Roller.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
+        self.config = constants.Subsystems.Roller
+        self._rollerMotor = SparkMax(self.config.kRollerMotorCANId, SparkBase.MotorType.kBrushless)
         self.sparkConfig = SparkMaxConfig()
-        self.sparkConfig.voltageCompensation(constants.Subsystems.Roller.kRollerMotorVComp)
-        self.sparkConfig.smartCurrentLimit(constants.Subsystems.Roller.kRollerMotorCurrentLimit)
+        self.sparkConfig.inverted(True)
+        self.sparkConfig.voltageCompensation(self.config.kRollerMotorVComp)
+        self.sparkConfig.smartCurrentLimit(self.config.kRollerMotorCurrentLimit)
         utils.setSparkConfig(self._rollerMotor.configure(self.sparkConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters))
         
-    def rollerCommand(
-            self, 
-            getForward: Callable[[], units.percent], 
-            getReverse: Callable[[], units.percent]
-    ) -> Command:
-        return self.run(
-            lambda: self._rollerMotor.set(getForward() - getReverse())
-        ).withName("RollerSubsystem:Roller")
+    def stop(self) -> None:
+        self._rollerMotor.set(0)
 
+    def ejectCommand(self) -> Command:
+        return self.run(
+            lambda: self._rollerMotor.set(self.config.kRollerMotorEjectSpeed)
+        ).finallyDo(lambda _: self.stop()).withName("RollerSubsystem:Roller")

@@ -17,12 +17,14 @@ class LocalizationSubsystem(Subsystem):
       self,
       poseSensors: tuple[PoseSensor, ...],
       getGyroRotation: Callable[[], Rotation2d],
-      getModulePositions: Callable[[], tuple[SwerveModulePosition, ...]]
+      getModulePositions: Callable[[], tuple[SwerveModulePosition, ...]],
+      resetPose: Callable[[Pose2d], None]
     ) -> None:
     super().__init__()
     self._poseSensors = poseSensors
     self._getGyroRotation = getGyroRotation
     self._getModulePositions = getModulePositions
+    self._resetPose = resetPose
 
     self._poseEstimator = SwerveDrive4PoseEstimator(
       constants.Subsystems.Drive.kDriveKinematics,
@@ -74,6 +76,7 @@ class LocalizationSubsystem(Subsystem):
 
   def resetPose(self, pose: Pose2d) -> None:
     self._poseEstimator.resetPose(pose)
+    # self._resetPose(pose)
 
   def hasVisionTargets(self) -> bool:
     for poseSensor in self._poseSensors:
