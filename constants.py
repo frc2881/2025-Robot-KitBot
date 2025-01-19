@@ -19,7 +19,7 @@ class Subsystems:
     kTrackWidth: units.meters = units.inchesToMeters(21.5)
     kWheelBase: units.meters = units.inchesToMeters(24.5)
 
-    kTranslationSpeedMax: units.meters_per_second = 1
+    kTranslationSpeedMax: units.meters_per_second = 4.8
     kRotationSpeedMax: units.radians_per_second = 4 * math.pi  # type: ignore
 
     _swerveModuleConstants = SwerveModuleConstants(
@@ -50,7 +50,7 @@ class Subsystems:
       translation_constants = PIDConstants(5.0, 0, 0),
       rotation_constants = PIDConstants(5.0, 0, 0)
     )
-    kPathFindingConstraints = PathConstraints(0.8, 1.6, units.degreesToRadians(540), units.degreesToRadians(720))
+    kPathFindingConstraints = PathConstraints(3.6, 2.4, units.degreesToRadians(540), units.degreesToRadians(720))
 
     kDriftCorrectionControllerPID = PID(0.01, 0, 0)
     kDriftCorrectionPositionTolerance: float = 0.5
@@ -72,10 +72,8 @@ class Subsystems:
 
   class Roller:
     kRollerMotorCANId: int = 10
-    kRollerMotorPID = PID(0.075, 0, 0)
-    kRollerMotorVComp: float = 10.0
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorEjectSpeed: float = 0.44
+    kRollerMotorEjectSpeed: float = 0.2
 
 class Sensors:
   class Gyro:

@@ -37,4 +37,4 @@ class GameCommands:
     ).withName("GameCommands:RumbleControllers")
   
   def scoreCommand(self) -> Command:
-    return self._robot.rollerSubsystem.ejectCommand().withTimeout(2)
+    return self._robot.rollerSubsystem.ejectCommand().withTimeout(2.0)
