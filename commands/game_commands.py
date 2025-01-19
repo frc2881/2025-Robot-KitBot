@@ -35,3 +35,6 @@ class GameCommands:
     ).onlyIf(
       lambda: RobotBase.isReal() and not utils.isAutonomousMode()
     ).withName("GameCommands:RumbleControllers")
+  
+  def scoreCommand(self) -> Command:
+    return self._robot.rollerSubsystem.ejectCommand().withTimeout(2.0)

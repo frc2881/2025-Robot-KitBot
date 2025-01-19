@@ -50,7 +50,7 @@ class Subsystems:
       translation_constants = PIDConstants(5.0, 0, 0),
       rotation_constants = PIDConstants(5.0, 0, 0)
     )
-    kPathFindingConstraints = PathConstraints(2.4, 1.6, units.degreesToRadians(540), units.degreesToRadians(720))
+    kPathFindingConstraints = PathConstraints(3.6, 2.4, units.degreesToRadians(540), units.degreesToRadians(720))
 
     kDriftCorrectionControllerPID = PID(0.01, 0, 0)
     kDriftCorrectionPositionTolerance: float = 0.5
@@ -60,7 +60,7 @@ class Subsystems:
     kTargetAlignmentPositionTolerance: float = 1.0
     kTargetAlignmentVelocityTolerance: float = 1.0
     kTargetAlignmentCarpetFrictionCoeff: float = 0.2
-    kTargetAlignmentHeadingAdjustment: units.degrees = 180.0
+    kTargetAlignmentHeadingAdjustment: units.degrees = 0
 
     kInputLimitDemo: units.percent = 0.5
     kInputRateLimitDemo: units.percent = 0.33
@@ -69,6 +69,11 @@ class Subsystems:
     kSingleTagStandardDeviations: tuple[float, ...] = (1.0, 1.0, 2.0)
     kMultiTagStandardDeviations: tuple[float, ...] = (0.5, 0.5, 1.0)
     kMaxPoseAmbiguity: units.percent = 0.2
+
+  class Roller:
+    kRollerMotorCANId: int = 10
+    kRollerMotorCurrentLimit: int = 60
+    kRollerMotorEjectSpeed: float = 0.2
 
 class Sensors:
   class Gyro:

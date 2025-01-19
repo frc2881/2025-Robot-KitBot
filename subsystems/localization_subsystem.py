@@ -23,7 +23,7 @@ class LocalizationSubsystem(Subsystem):
     self._poseSensors = poseSensors
     self._getGyroRotation = getGyroRotation
     self._getModulePositions = getModulePositions
-
+    
     self._poseEstimator = SwerveDrive4PoseEstimator(
       constants.Subsystems.Drive.kDriveKinematics,
       self._getGyroRotation(),

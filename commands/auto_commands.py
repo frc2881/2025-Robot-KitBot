@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from enum import Enum, auto
 from commands2 import Command, cmd
 from wpilib import SendableChooser, SmartDashboard
+from wpimath.geometry import Transform2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 from lib import logger, utils
@@ -10,8 +11,7 @@ if TYPE_CHECKING: from robot_container import RobotContainer
 import constants
 
 class AutoPath(Enum):
-  Move0 = auto()
-  Move2 = auto()
+  Move1 = auto()
 
 class AutoCommands:
   def __init__(
@@ -35,30 +35,32 @@ class AutoCommands:
 
     self._autoCommandChooser = SendableChooser()
     self._autoCommandChooser.setDefaultOption("None", cmd.none)
-    self._autoCommandChooser.addOption("[0] 0_", self.auto_0_)
-    self._autoCommandChooser.addOption("[2] 2_", self.auto_2_)
+    self._autoCommandChooser.addOption("[0]_1", self.auto_0_1_)
     SmartDashboard.putData("Robot/Auto/Command", self._autoCommandChooser)
 
   def getSelected(self) -> Command:
     return self._autoCommandChooser.getSelected()()
-
+  
+  def _reset(self, path: AutoPath) -> Command:
+    return cmd.sequence(
+      AutoBuilder.resetOdom(self._paths.get(path).getPathPoses()[0].transformBy(Transform2d(0, 0, self._paths.get(path).getInitialHeading()))),
+      cmd.waitSeconds(0.1)
+    )
+  
   def _move(self, path: AutoPath) -> Command:
-    return AutoBuilder.followPath(self._paths.get(path) 
+    return cmd.sequence(
+      AutoBuilder.followPath(self._paths.get(path))
     ).withTimeout(
       constants.Game.Commands.kAutoMoveTimeout
     )
-  
-  def _alignToTarget(self) -> Command:
-    return cmd.sequence(self._robot.gameCommands.alignRobotToTargetCommand())
 
-  def auto_0_(self) -> Command:
-    return cmd.sequence(
-      self._move(AutoPath.Move0)
-    ).withName("AutoCommands:[0] 0_")
+  def _score(self) -> Command:
+    return self._robot.gameCommands.scoreCommand()
 
-  def auto_2_(self) -> Command:
+  def auto_0_1_(self) -> Command:
     return cmd.sequence(
-      self._move(AutoPath.Move2),
-      self._alignToTarget()
-    ).withName("AutoCommands:[2] 2_")
+      self._reset(AutoPath.Move1),
+      self._move(AutoPath.Move1),
+      self._score()
+    ).withName("AutoCommands:[0]_1_")
   

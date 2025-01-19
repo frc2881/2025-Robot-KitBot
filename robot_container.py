@@ -1,5 +1,6 @@
 from commands2 import Command, cmd
 from wpilib import DriverStation, SendableChooser, SmartDashboard
+from wpimath.geometry import Pose2d
 from lib import logger, utils
 from lib.controllers.game_controller import GameController
 from lib.sensors.gyro_sensor_navx2 import GyroSensor_NAVX2
@@ -8,6 +9,7 @@ from commands.auto_commands import AutoCommands
 from commands.game_commands import GameCommands
 from subsystems.drive_subsystem import DriveSubsystem
 from subsystems.localization_subsystem import LocalizationSubsystem
+from subsystems.roller_subsystem import RollerSubsystem
 import constants
 
 class RobotContainer:
@@ -26,7 +28,12 @@ class RobotContainer:
     
   def _setupSubsystems(self) -> None:
     self.driveSubsystem = DriveSubsystem(self.gyroSensor.getHeading)
-    self.localizationSubsystem = LocalizationSubsystem(self.poseSensors, self.gyroSensor.getRotation, self.driveSubsystem.getModulePositions)
+    self.localizationSubsystem = LocalizationSubsystem(
+      self.poseSensors, 
+      self.gyroSensor.getRotation, 
+      self.driveSubsystem.getModulePositions
+    )
+    self.rollerSubsystem = RollerSubsystem()
     
   def _setupControllers(self) -> None:
     self.driverController = GameController(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
@@ -44,11 +51,12 @@ class RobotContainer:
         self.driverController.getLeftX,
         self.driverController.getRightX
     ))
+
     self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand())
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
     # self.driverController.rightTrigger().whileTrue(cmd.none())
     # self.driverController.rightBumper().whileTrue(cmd.none())
-    # self.driverController.leftTrigger().whileTrue(cmd.none())
+    self.driverController.leftTrigger().whileTrue(self.rollerSubsystem.ejectCommand())
     # self.driverController.leftBumper().whileTrue(cmd.none())
     # self.driverController.povUp().whileTrue(cmd.none())
     # self.driverController.povDown().whileTrue(cmd.none())
