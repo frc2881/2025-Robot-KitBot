@@ -8,7 +8,6 @@ from wpimath.kinematics import SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from photonlibpy.photonPoseEstimator import PoseStrategy
 from lib.sensors.pose_sensor import PoseSensor
-from lib.classes import TargetInfo
 from lib import logger, utils
 import constants
 
@@ -33,7 +32,6 @@ class LocalizationSubsystem(Subsystem):
 
     self._pose = Pose2d()
     self._targetPose = Pose3d()
-    self._targetInfo = TargetInfo(0, 0, 0)
     self._currentAlliance = None
 
     SmartDashboard.putNumber("Robot/Game/Field/Length", constants.Game.Field.kLength)
@@ -42,7 +40,6 @@ class LocalizationSubsystem(Subsystem):
     utils.addRobotPeriodic(lambda: [ 
       self._updatePose(),
       self._updateTargetPose(),
-      self._updateTargetInfo(),
       self._updateTelemetry()
     ], 0.033)
 
@@ -90,25 +87,6 @@ class LocalizationSubsystem(Subsystem):
       ).transformBy(
         constants.Game.Field.Targets.kTargetTransform
       )
-
-  def _updateTargetInfo(self) -> None:
-    self._targetInfo.distance = self._pose.translation().distance(self._targetPose.toPose2d().translation())
-    translation = self._targetPose.toPose2d().relativeTo(self._pose).translation()
-    rotation = Rotation2d(translation.X(), translation.Y()).rotateBy(self._pose.rotation())
-    self._targetInfo.heading = utils.wrapAngle(rotation.degrees())
-    self._targetInfo.pitch = math.degrees(math.atan2((self._targetPose - Pose3d(self._pose)).Z(), self._targetInfo.distance))
-
-  def getTargetDistance(self) -> units.meters:
-    return self._targetInfo.distance
-
-  def getTargetHeading(self) -> units.degrees:
-    return self._targetInfo.heading
-  
-  def getTargetPitch(self) -> units.degrees:
-    return self._targetInfo.pitch
   
   def _updateTelemetry(self) -> None:
     SmartDashboard.putNumberArray("Robot/Localization/Pose", [self._pose.X(), self._pose.Y(), self._pose.rotation().degrees()])
-    SmartDashboard.putNumber("Robot/Localization/Target/Distance", self._targetInfo.distance)
-    SmartDashboard.putNumber("Robot/Localization/Target/Heading", self._targetInfo.heading)
-    SmartDashboard.putNumber("Robot/Localization/Target/Pitch", self._targetInfo.pitch)

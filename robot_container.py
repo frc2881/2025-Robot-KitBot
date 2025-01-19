@@ -52,7 +52,7 @@ class RobotContainer:
         self.driverController.getRightX
     ))
 
-    self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand())
+    # self.driverController.rightStick().whileTrue(cmd.none())
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
     # self.driverController.rightTrigger().whileTrue(cmd.none())
     # self.driverController.rightBumper().whileTrue(cmd.none())
