@@ -1,12 +1,11 @@
 from typing import Callable
 from wpilib import SmartDashboard
 from wpimath import units
-from wpimath.geometry import Rotation2d, Pose2d, Pose3d, Transform3d, Rotation3d
+from wpimath.geometry import Rotation2d, Pose2d, Pose3d
 from wpimath.kinematics import SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from photonlibpy.photonPoseEstimator import PoseStrategy
 from lib.sensors.pose_sensor import PoseSensor
-from lib.sensors.object_sensor import ObjectSensor
 from lib import logger, utils
 from core.classes import Target, TargetAlignmentLocation, TargetType
 import core.constants as constants
