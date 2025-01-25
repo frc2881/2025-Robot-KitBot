@@ -94,16 +94,23 @@ class Sensors:
       PoseSensorConfig(
         "Front",
         Transform3d(
-          Translation3d(units.inchesToMeters(0), units.inchesToMeters(0), units.inchesToMeters(0)),
-          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(0), units.degreesToRadians(0))
+          Translation3d(units.inchesToMeters(13.75), units.inchesToMeters(0), units.inchesToMeters(13.03)),
+          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(12.9), units.degreesToRadians(0))
+        ), _poseStrategy, _fallbackPoseStrategy, APRIL_TAG_FIELD_LAYOUT
+      ),
+      PoseSensorConfig(
+        "Rear",
+        Transform3d(
+          Translation3d(units.inchesToMeters(-13.60), units.inchesToMeters(-6.40), units.inchesToMeters(24.60)),
+          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-39.1), units.degreesToRadians(180.0))
         ), _poseStrategy, _fallbackPoseStrategy, APRIL_TAG_FIELD_LAYOUT
       ),
     )
 
   class Camera:
     kStreams: dict[str, str] = {
-      "Front": "http://10.28.81.6:1184/?action=stream",
-      "Driver": "http://10.28.81.6:1188/?action=stream"
+      "Front": "http://10.28.81.6:1182/?action=stream",
+      "Driver": "http://10.28.81.6:1182/?action=stream"
     }
 
 class Controllers:
