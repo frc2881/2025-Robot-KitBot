@@ -51,7 +51,7 @@ class Subsystems:
 
     kPathPlannerRobotConfig = PATHPLANNER_ROBOT_CONFIG
     kPathPlannerController = PPHolonomicDriveController(PIDConstants(5.0, 0, 0), PIDConstants(5.0, 0, 0))
-    kPathPlannerConstraints = PathConstraints(3.6, 2.4, units.degreesToRadians(540), units.degreesToRadians(720))
+    kPathPlannerConstraints = PathConstraints(4.8, 3.6, units.degreesToRadians(540), units.degreesToRadians(720))
 
     kDriftCorrectionConstants = DriftCorrectionConstants(
       rotationPID = PID(0.01, 0, 0), 
@@ -161,9 +161,9 @@ class Game:
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
           TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(24), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(24), units.inchesToMeters(-6.5), 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(24), units.inchesToMeters(6.5), 0, Rotation3d())
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(18), 0, 0, Rotation3d()),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(16), units.inchesToMeters(-6.5), 0, Rotation3d()),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(18), units.inchesToMeters(6.5), 0, Rotation3d())
         },
         TargetType.Station: {
           TargetAlignmentLocation.Default: Transform3d(),

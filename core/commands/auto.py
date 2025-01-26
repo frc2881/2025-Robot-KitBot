@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from enum import Enum, auto
 from commands2 import Command, cmd
 from wpilib import SendableChooser, SmartDashboard
-from wpimath.geometry import Transform2d
+from wpimath.geometry import Transform2d, Pose2d, Rotation2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 from lib import logger, utils
@@ -58,8 +58,8 @@ class AutoCommands:
       constants.Game.Commands.kAutoMoveTimeout
     )
   
-  def _alignToTarget(self) -> Command:
-    return cmd.sequence(self._robot.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))
+  def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return cmd.sequence(self._robot.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, targetAlignmentLocation))
 
   def _score(self) -> Command:
     return self._robot.gameCommands.scoreCommand()
@@ -67,14 +67,48 @@ class AutoCommands:
   def auto_0_1_(self) -> Command:
     return cmd.sequence(
       self._move(AutoPath.Move1),
+      self._alignToTarget(TargetAlignmentLocation.Center),
       self._score(),
       self._move(AutoPath.Pickup1),
+      self._alignToTarget(TargetAlignmentLocation.Left),
       cmd.waitSeconds(0.75),
       self._move(AutoPath.Move2),
+      self._alignToTarget(TargetAlignmentLocation.Left),
       self._score(),
       self._move(AutoPath.Pickup2),
+      self._alignToTarget(TargetAlignmentLocation.Right),
       cmd.waitSeconds(0.75),
       self._move(AutoPath.Move2),
+      self._alignToTarget(TargetAlignmentLocation.Right),
       self._score()
     ).withName("AutoCommands:[0]_1_")
+  
+  def autoTest(self) -> Command:
+    return AutoBuilder.pathfindToPose(
+      Pose2d(15.7, 5.9, Rotation2d().fromDegrees(-120)),
+      constants.Subsystems.Drive.kPathPlannerConstraints
+    )
+  
+  def autoTeleop(self) -> Command:
+    return cmd.sequence(
+      self.autoTest(),
+      self._alignToTarget(TargetAlignmentLocation.Right),
+      cmd.waitSeconds(.5),
+      AutoBuilder.pathfindToPose(
+        Pose2d(10.9, 4.1, Rotation2d().fromDegrees(0)),
+        constants.Subsystems.Drive.kPathPlannerConstraints
+      ),
+      self._alignToTarget(TargetAlignmentLocation.Left),
+      self._score(),
+      self.autoTest(),
+      self._alignToTarget(TargetAlignmentLocation.Right),
+      cmd.waitSeconds(.5),
+      AutoBuilder.pathfindToPose(
+        Pose2d(10.9, 4.1, Rotation2d().fromDegrees(0)),
+        constants.Subsystems.Drive.kPathPlannerConstraints
+      ),
+      self._alignToTarget(TargetAlignmentLocation.Right),
+      self._score()
+
+    )
   

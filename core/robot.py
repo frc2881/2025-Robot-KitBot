@@ -64,10 +64,10 @@ class RobotCore:
     # self.driverController.povDown().whileTrue(cmd.none())
     # self.driverController.povLeft().whileTrue(cmd.none())
     # self.driverController.povRight().whileTrue(cmd.none())
-    # self.driverController.a().whileTrue(cmd.none())
+    self.driverController.a().whileTrue(self.autoCommands.autoTest())
     # self.driverController.b().whileTrue(cmd.none())
     # self.driverController.y().whileTrue(cmd.none())
-    # self.driverController.x().whileTrue(cmd.none())
+    self.driverController.x().whileTrue(self.autoCommands.autoTeleop())
     self.driverController.start().onTrue(self.gyroSensor.calibrateCommand())
     self.driverController.back().onTrue(self.gyroSensor.resetCommand())
 
