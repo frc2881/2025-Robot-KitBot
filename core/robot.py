@@ -52,7 +52,9 @@ class RobotCore:
         self.driverController.getRightX
     ))
 
-    self.driverController.rightStick().whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center))
+    self.driverController.rightStick().and_((self.driverController.rightBumper().or_(self.driverController.leftBumper()).or_(self.driverController.leftTrigger())).negate()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center))
+    self.driverController.rightStick().and_(self.driverController.rightBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
+    self.driverController.rightStick().and_(self.driverController.leftBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))    
     self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
     # self.driverController.rightTrigger().whileTrue(cmd.none())
     # self.driverController.rightBumper().whileTrue(cmd.none())

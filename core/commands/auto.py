@@ -13,6 +13,9 @@ import core.constants as constants
 
 class AutoPath(Enum):
   Move1 = auto()
+  Move2 = auto()
+  Pickup1 = auto()
+  Pickup2 = auto()
 
 class AutoCommands:
   def __init__(
@@ -36,11 +39,11 @@ class AutoCommands:
 
     self._autoCommandChooser = SendableChooser()
     self._autoCommandChooser.setDefaultOption("None", cmd.none)
-    self._autoCommandChooser.addOption("[0]_1_", self.auto_0_1_)
+    self._autoCommandChooser.addOption("[0]_1_", self.auto_0_1_())
     SmartDashboard.putData("Robot/Auto/Command", self._autoCommandChooser)
 
   def getSelected(self) -> Command:
-    return self._autoCommandChooser.getSelected()()
+    return self._autoCommandChooser.getSelected()
   
   def _reset(self, path: AutoPath) -> Command:
     return cmd.sequence(
@@ -63,8 +66,15 @@ class AutoCommands:
 
   def auto_0_1_(self) -> Command:
     return cmd.sequence(
-      self._reset(AutoPath.Move1),
       self._move(AutoPath.Move1),
+      self._score(),
+      self._move(AutoPath.Pickup1),
+      cmd.waitSeconds(0.75),
+      self._move(AutoPath.Move2),
+      self._score(),
+      self._move(AutoPath.Pickup2),
+      cmd.waitSeconds(0.75),
+      self._move(AutoPath.Move2),
       self._score()
     ).withName("AutoCommands:[0]_1_")
   

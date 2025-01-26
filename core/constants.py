@@ -1,6 +1,6 @@
 import math
 from wpimath import units
-from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Pose3d, Translation2d
+from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Pose3d, Translation2d, Rotation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 from navx import AHRS
@@ -77,8 +77,8 @@ class Subsystems:
 class Services:
   class Localization:
     kStateStandardDeviations: tuple[float, float, float] = (0.05, 0.05, units.degreesToRadians(5))
-    kVisionMultiTagStandardDeviations: tuple[float, float, float] = (0.1, 0.1, units.degreesToRadians(10))
-    kVisionDefaultStandardDeviations: tuple[float, float, float] = (0.5, 0.5, units.degreesToRadians(15))
+    kVisionMultiTagStandardDeviations: tuple[float, float, float] = (0.1, 0.1, units.degreesToRadians(5))
+    kVisionDefaultStandardDeviations: tuple[float, float, float] = (0.2, 0.2, units.degreesToRadians(5))
     kVisionMaxPoseAmbiguity: units.percent = 0.2
 
 class Sensors: 
@@ -167,9 +167,9 @@ class Game:
         },
         TargetType.Station: {
           TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(0), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(0), units.inchesToMeters(-30), 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(0), units.inchesToMeters(30), 0, Rotation3d())
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(28), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(28), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(28), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
         },
         TargetType.Processor: {
           TargetAlignmentLocation.Default: Transform3d(),

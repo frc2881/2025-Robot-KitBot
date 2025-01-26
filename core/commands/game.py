@@ -33,7 +33,7 @@ class GameCommands:
     ).withName("GameCommands:AlignRobotToTarget")
 
   def scoreCommand(self) -> Command:
-    return self._robot.rollerSubsystem.ejectCommand().withTimeout(2.0).withName("GameCommands:Score")
+    return self._robot.rollerSubsystem.ejectCommand().withTimeout(0.75).withName("GameCommands:Score")
 
   def rumbleControllersCommand(self, mode: ControllerRumbleMode, pattern: ControllerRumblePattern) -> Command:
     return cmd.parallel(
