@@ -12,6 +12,7 @@ from core.classes import TargetAlignmentLocation
 import core.constants as constants
 
 class AutoPath(Enum):
+  Move = auto()
   Move1 = auto()
   Move2 = auto()
   Pickup1 = auto()
@@ -53,7 +54,7 @@ class AutoCommands:
   
   def _move(self, path: AutoPath) -> Command:
     return cmd.sequence(
-      AutoBuilder.followPath(self._paths.get(path))
+      AutoBuilder.pathfindThenFollowPath(self._paths.get(path), constants.Subsystems.Drive.kPathPlannerConstraints)
     ).withTimeout(
       constants.Game.Commands.kAutoMoveTimeout
     )
@@ -66,15 +67,15 @@ class AutoCommands:
 
   def auto_0_1_(self) -> Command:
     return cmd.sequence(
-      self._move(AutoPath.Move1),
-      self._score(),
-      self._move(AutoPath.Pickup1),
-      cmd.waitSeconds(0.75),
-      self._move(AutoPath.Move2),
-      self._score(),
-      self._move(AutoPath.Pickup2),
-      cmd.waitSeconds(0.75),
-      self._move(AutoPath.Move2),
-      self._score()
+      self._move(AutoPath.Move)
+      # self._score(),
+      # self._move(AutoPath.Pickup1),
+      # cmd.waitSeconds(0.75),
+      # self._move(AutoPath.Move2),
+      # self._score(),
+      # self._move(AutoPath.Pickup2),
+      # cmd.waitSeconds(0.75),
+      # self._move(AutoPath.Move2),
+      # self._score()
     ).withName("AutoCommands:[0]_1_")
   
