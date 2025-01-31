@@ -26,6 +26,7 @@ class AutoCommands:
     self._robot = robot
 
     self._paths = { path: PathPlannerPath.fromPathFile(path.name) for path in AutoPath }
+    self._selectedAutoCommand = cmd.none()
 
     AutoBuilder.configure(
       self._robot.localizationService.getRobotPose, 
@@ -40,11 +41,12 @@ class AutoCommands:
 
     self._autoCommandChooser = SendableChooser()
     self._autoCommandChooser.setDefaultOption("None", cmd.none)
-    self._autoCommandChooser.addOption("[0]_1_", self.auto_0_1_())
+    self._autoCommandChooser.addOption("[0]_1_", self.auto_0_1_)
+    self._autoCommandChooser.onChange(lambda autoCommand: setattr(self, "_selectedAutoCommand", autoCommand()))
     SmartDashboard.putData("Robot/Auto/Command", self._autoCommandChooser)
 
   def getSelected(self) -> Command:
-    return self._autoCommandChooser.getSelected()
+    return self._selectedAutoCommand
   
   def _reset(self, path: AutoPath) -> Command:
     return cmd.sequence(
