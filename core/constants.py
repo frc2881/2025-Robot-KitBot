@@ -65,7 +65,7 @@ class Subsystems:
       rotationHeadingModeOffset = 0.0,
       rotationTranslationModeOffset = 180,
       translationPID = PID(5.0, 0, 0),
-      translationTolerance = Tolerance(0.05, 0.1),
+      translationTolerance = Tolerance(0.025, 0.05),
       translationSpeedMax = kTranslationSpeedMax * 0.5
     )
 
