@@ -51,7 +51,7 @@ class Subsystems:
 
     kPathPlannerRobotConfig = PATHPLANNER_ROBOT_CONFIG
     kPathPlannerController = PPHolonomicDriveController(PIDConstants(5.0, 0, 0), PIDConstants(5.0, 0, 0))
-    kPathPlannerConstraints = PathConstraints(3.6, 2.4, units.degreesToRadians(540), units.degreesToRadians(720))
+    kPathPlannerConstraints = PathConstraints(4.8, 3.6, units.degreesToRadians(540), units.degreesToRadians(720))
 
     kDriftCorrectionConstants = DriftCorrectionConstants(
       rotationPID = PID(0.01, 0, 0), 
@@ -65,7 +65,7 @@ class Subsystems:
       rotationHeadingModeOffset = 0.0,
       rotationTranslationModeOffset = 180,
       translationPID = PID(5.0, 0, 0),
-      translationTolerance = Tolerance(0.025, 0.05),
+      translationTolerance = Tolerance(0.05, 0.1),
       translationSpeedMax = kTranslationSpeedMax * 0.5
     )
 
@@ -121,6 +121,7 @@ class Controllers:
 class Game:
   class Commands:
     kAutoMoveTimeout: units.seconds = 4.0
+    kAutoTargetAlignmentTimeout: units.seconds = 2.0
 
   class Field:
     kAprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT
