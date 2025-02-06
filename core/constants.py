@@ -21,7 +21,7 @@ class Subsystems:
     kWheelBase: units.meters = units.inchesToMeters(24.5)
 
     kTranslationSpeedMax: units.meters_per_second = 4.8
-    kRotationSpeedMax: units.radians_per_second = 4 * math.pi  # type: ignore
+    kRotationSpeedMax: units.radians_per_second = 4 * math.pi
 
     kInputLimitDemo: units.percent = 0.5
     kInputRateLimitDemo: units.percent = 0.33
