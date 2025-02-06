@@ -52,6 +52,7 @@ class AutoCommands:
 
     self._autoCommandChooser = SendableChooser()
     self._autoCommandChooser.setDefaultOption("None", cmd.none)
+
     self._autoCommandChooser.addOption("[1]_1_", self.auto_1_1_)
     self._autoCommandChooser.addOption("[1]_1_6", self.auto_1_1_6)
     self._autoCommandChooser.addOption("[1]_1_6_6", self.auto_1_1_6_6)
@@ -64,6 +65,7 @@ class AutoCommands:
     self._autoCommandChooser.addOption("[3]_3_4_4", self.auto_3_3_4_4)
     self._autoCommandChooser.addOption("[3]_3_4_4_5", self.auto_3_3_4_4_5)
     self._autoCommandChooser.addOption("[3]_3_4_4_5_6", self.auto_3_3_4_4_5_6)
+    
     self._autoCommandChooser.onChange(lambda autoCommand: setattr(self, "_selectedAutoCommand", autoCommand()))
     SmartDashboard.putData("Robot/Auto/Command", self._autoCommandChooser)
 
