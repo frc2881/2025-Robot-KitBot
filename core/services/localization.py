@@ -1,6 +1,5 @@
 from typing import Callable
 from wpilib import SmartDashboard
-from wpimath import units
 from wpimath.geometry import Rotation2d, Pose2d, Pose3d
 from wpimath.kinematics import SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
