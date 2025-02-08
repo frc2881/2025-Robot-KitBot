@@ -110,7 +110,7 @@ class Sensors:
   class Camera:
     kStreams: dict[str, str] = {
       "Front": "http://10.28.81.6:1182/?action=stream",
-      "Driver": "http://10.28.81.6:1182/?action=stream"
+      "Driver": "http://10.28.81.6:1184/?action=stream"
     }
 
 class Controllers:
@@ -162,15 +162,15 @@ class Game:
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
           TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(24), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(24), units.inchesToMeters(-6.5), 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(24), units.inchesToMeters(6.5), 0, Rotation3d())
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(20), 0, 0, Rotation3d()),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(20), units.inchesToMeters(-6.5), 0, Rotation3d()),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(20), units.inchesToMeters(6.5), 0, Rotation3d())
         },
         TargetType.Station: {
           TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(28), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(28), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(28), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(22), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(22), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
         },
         TargetType.Processor: {
           TargetAlignmentLocation.Default: Transform3d(),
