@@ -2,13 +2,13 @@ from typing import TYPE_CHECKING
 from enum import Enum, auto
 from commands2 import Command, cmd
 from wpilib import SendableChooser, SmartDashboard
-from wpimath.geometry import Transform2d, Pose2d, Rotation2d
+from wpimath.geometry import Pose2d, Transform2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 from lib import logger, utils
 from lib.classes import Alliance, TargetAlignmentMode
 if TYPE_CHECKING: from core.robot import RobotCore
-from core.classes import TargetAlignmentLocation
+from core.classes import TargetAlignmentLocation, TargetPositionType, GamePiece
 import core.constants as constants
 
 class AutoPath(Enum):
@@ -26,8 +26,6 @@ class AutoPath(Enum):
   Move2_3 = auto()
   Move2_4 = auto()
   Move2_5 = auto()
-
-
 
 class AutoCommands:
   def __init__(
@@ -78,11 +76,18 @@ class AutoCommands:
       cmd.waitSeconds(0.1)
     )
   
+  def _start(self) -> Command:
+    return cmd.none()
+
   def _move(self, path: AutoPath) -> Command:
-    return AutoBuilder.followPath(self._paths.get(path)).withTimeout(
-      constants.Game.Commands.kAutoMoveTimeout
-    )
+    return AutoBuilder.followPath(self._paths.get(path)).withTimeout(constants.Game.Commands.kAutoMoveTimeout)
   
+  def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return self._robot.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, targetAlignmentLocation)
+
+  def _score(self) -> Command:
+    return self._robot.gameCommands.scoreCommand()
+
   def _getStartingPose(self, position: int) -> Pose2d:
     match position:
       case 1:
@@ -95,18 +100,16 @@ class AutoCommands:
         return None
   
   def moveToStartingPosition(self, position: int) -> Command:
-    return AutoBuilder.pathfindToPose(self._getStartingPose(position), constants.Subsystems.Drive.kPathPlannerConstraints)
-  
-  def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
-    return self._robot.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, targetAlignmentLocation).withTimeout(
-      constants.Game.Commands.kAutoTargetAlignmentTimeout
-    )
+    return AutoBuilder.pathfindToPose(
+      self._getStartingPose(position), 
+      constants.Subsystems.Drive.kPathPlannerConstraints
+    ).onlyIf(
+      lambda: not utils.isCompetitionMode()
+    ).withName("AutoCommands:MoveToStartingPosition")
 
-  def _score(self) -> Command:
-    return self._robot.gameCommands.scoreCommand()
-  
   def auto_1_1_(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start1_1),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -116,6 +119,7 @@ class AutoCommands:
   
   def auto_1_1_6(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start1_1),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -129,6 +133,7 @@ class AutoCommands:
   
   def auto_1_1_6_6(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start1_1),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -148,6 +153,7 @@ class AutoCommands:
   
   def auto_1_1_6_6_5(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start1_1),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -173,6 +179,7 @@ class AutoCommands:
   
   def auto_2_2(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start2_2),
       self._alignToTarget(TargetAlignmentLocation.Center), 
       self._score()
@@ -180,6 +187,7 @@ class AutoCommands:
   
   def auto_2_2_3(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start2_2),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -193,6 +201,7 @@ class AutoCommands:
   
   def auto_2_2_3_3(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start2_2),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -212,6 +221,7 @@ class AutoCommands:
 
   def auto_3_3_(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start3_3),
       self._alignToTarget(TargetAlignmentLocation.Center), 
       self._score(),
@@ -221,6 +231,7 @@ class AutoCommands:
   
   def auto_3_3_4(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start3_3),
       self._alignToTarget(TargetAlignmentLocation.Center), 
       self._score(),
@@ -234,6 +245,7 @@ class AutoCommands:
   
   def auto_3_3_4_4(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start3_3),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -253,6 +265,7 @@ class AutoCommands:
   
   def auto_3_3_4_4_5(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start3_3),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),
@@ -278,6 +291,7 @@ class AutoCommands:
   
   def auto_3_3_4_4_5_6(self) -> Command:
     return cmd.sequence(
+      self._start(),
       self._move(AutoPath.Start3_3),
       self._alignToTarget(TargetAlignmentLocation.Left), 
       self._score(),

@@ -45,13 +45,16 @@ class RobotCore:
     self.autoCommands = AutoCommands(self)
 
   def _initTriggers(self) -> None:
+    self._setupDriverControls()
+    self._setupOperatorControls()
+
+  def _setupDriverControls(self) -> None:
     self.driveSubsystem.setDefaultCommand(
       self.driveSubsystem.driveCommand(
         self.driverController.getLeftY,
         self.driverController.getLeftX,
         self.driverController.getRightX
     ))
-
     self.driverController.rightStick().and_((self.driverController.rightBumper().or_(self.driverController.leftBumper()).or_(self.driverController.leftTrigger())).negate()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center))
     self.driverController.rightStick().and_(self.driverController.rightBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
     self.driverController.rightStick().and_(self.driverController.leftBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))    
@@ -71,6 +74,8 @@ class RobotCore:
     self.driverController.start().onTrue(self.gyroSensor.calibrateCommand())
     self.driverController.back().onTrue(self.gyroSensor.resetCommand())
 
+  def _setupOperatorControls(self) -> None:
+    pass
     # self.operatorController.rightTrigger().whileTrue(cmd.none())
     # self.operatorController.rightBumper().whileTrue(cmd.none())
     # self.operatorController.leftTrigger().whileTrue(cmd.none())
