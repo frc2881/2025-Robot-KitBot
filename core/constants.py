@@ -1,8 +1,9 @@
 import math
 from wpimath import units
-from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Pose3d, Translation2d, Rotation2d
+from wpimath.geometry import Transform3d, Translation3d, Rotation3d, Translation2d, Rotation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
-from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
+import wpilib
+from robotpy_apriltag import AprilTagFieldLayout
 from navx import AHRS
 from pathplannerlib.config import RobotConfig
 from pathplannerlib.controller import PPHolonomicDriveController, PIDConstants
@@ -10,14 +11,27 @@ from pathplannerlib.pathfinding import PathConstraints
 from photonlibpy.photonPoseEstimator import PoseStrategy
 from rev import SparkLowLevel
 from lib import logger, utils
-from lib.classes import Alliance, PID, Tolerance, SwerveModuleConstants, SwerveModuleConfig, SwerveModuleLocation, PoseSensorConfig, DriftCorrectionConstants, TargetAlignmentConstants
+from lib.classes import (
+  Alliance, 
+  PID, 
+  Tolerance, 
+  SwerveModuleConstants, 
+  SwerveModuleConfig, 
+  SwerveModuleLocation, 
+  DriftCorrectionConstants, 
+  TargetAlignmentConstants,
+  PoseSensorConstants,
+  PoseSensorConfig
+)
 from core.classes import Target, TargetType, TargetAlignmentLocation
 
-APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout().loadField(AprilTagField.k2025ReefscapeAndyMark)
+APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout(f'{ wpilib.getDeployDirectory() }/localization/2025-reefscape-andymark-filtered.json')
 PATHPLANNER_ROBOT_CONFIG = RobotConfig.fromGUISettings()
 
 class Subsystems:
   class Drive:
+    kRobotWidth: units.meters = units.inchesToMeters(31.5)
+    kRobotLength: units.meters = units.inchesToMeters(34.5)
     kTrackWidth: units.meters = units.inchesToMeters(21.5)
     kWheelBase: units.meters = units.inchesToMeters(24.5)
 
@@ -39,7 +53,7 @@ class Subsystems:
       drivingMotorCurrentLimit = 80,
       drivingMotorPID = PID(0.04, 0, 0),
       turningMotorCurrentLimit = 20,
-      turningMotorPID = PID(1, 0, 0)
+      turningMotorPID = PID(1.0, 0, 0)
     )
 
     kSwerveModuleConfigs: tuple[SwerveModuleConfig, ...] = (
@@ -61,14 +75,14 @@ class Subsystems:
     )
 
     kTargetAlignmentConstants = TargetAlignmentConstants(
-      rotationPID = PID(0.075, 0, 0.001),
-      rotationTolerance = Tolerance(1.0, 2.0),
-      rotationSpeedMax = kRotationSpeedMax * 0.5, 
+      rotationPID = PID(0.1, 0, 0),
+      rotationTolerance = Tolerance(0.25, 0.5),
+      rotationSpeedMax = kRotationSpeedMax * 0.25, 
       rotationHeadingModeOffset = 0.0,
       rotationTranslationModeOffset = 180,
       translationPID = PID(5.0, 0, 0),
       translationTolerance = Tolerance(0.025, 0.05),
-      translationSpeedMax = kTranslationSpeedMax * 0.5
+      translationSpeedMax = kTranslationSpeedMax * 0.25
     )
 
   class Roller:
@@ -78,8 +92,9 @@ class Subsystems:
 
 class Services:
   class Localization:
-    kStateStandardDeviations: tuple[float, float, float] = (0.1, 0.1, units.degreesToRadians(5))
-    kVisionStandardDeviations: tuple[float, float, float] = (0.2, 0.2, units.degreesToRadians(10))
+    kStateStandardDeviations: tuple[float, float, float] = (0.04, 0.04, units.degreesToRadians(1))
+    kVisionStandardDeviations: tuple[float, float, float] = (0.4, 0.4, units.degreesToRadians(4))
+    kVisionMaxTargetDistance: units.meters = 4.0
     kVisionMaxPoseAmbiguity: units.percent = 0.2
 
 class Sensors: 
@@ -88,23 +103,26 @@ class Sensors:
       kComType = AHRS.NavXComType.kUSB1
 
   class Pose:
-    _poseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR
-    _fallbackPoseStrategy = PoseStrategy.LOWEST_AMBIGUITY
-    
+    _poseSensorConstants = PoseSensorConstants(
+      aprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT,
+      poseStrategy = PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+      fallbackPoseStrategy = PoseStrategy.LOWEST_AMBIGUITY
+    )
+
     kPoseSensorConfigs: tuple[PoseSensorConfig, ...] = (
       PoseSensorConfig(
         "Front",
         Transform3d(
           Translation3d(units.inchesToMeters(13.75), units.inchesToMeters(0), units.inchesToMeters(13.03)),
           Rotation3d(units.degreesToRadians(0), units.degreesToRadians(12.9), units.degreesToRadians(0))
-        ), _poseStrategy, _fallbackPoseStrategy, APRIL_TAG_FIELD_LAYOUT
+        ), _poseSensorConstants
       ),
       PoseSensorConfig(
         "Rear",
         Transform3d(
           Translation3d(units.inchesToMeters(-13.60), units.inchesToMeters(-6.40), units.inchesToMeters(24.60)),
           Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-39.1), units.degreesToRadians(180.0))
-        ), _poseStrategy, _fallbackPoseStrategy, APRIL_TAG_FIELD_LAYOUT
+        ), _poseSensorConstants
       ),
     )
 
@@ -135,9 +153,6 @@ class Game:
         Alliance.Red: {
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(1).toPose2d()): Target(TargetType.CoralStation, APRIL_TAG_FIELD_LAYOUT.getTagPose(1)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(2).toPose2d()): Target(TargetType.CoralStation, APRIL_TAG_FIELD_LAYOUT.getTagPose(2)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(3).toPose2d()): Target(TargetType.AlgaeProcessor, APRIL_TAG_FIELD_LAYOUT.getTagPose(3)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(4).toPose2d()): Target(TargetType.Barge, APRIL_TAG_FIELD_LAYOUT.getTagPose(4)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(5).toPose2d()): Target(TargetType.Barge, APRIL_TAG_FIELD_LAYOUT.getTagPose(5)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(6).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(6)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(7).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(7)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(8).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(8)),
@@ -148,9 +163,6 @@ class Game:
         Alliance.Blue: {
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(12).toPose2d()): Target(TargetType.CoralStation, APRIL_TAG_FIELD_LAYOUT.getTagPose(12)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(13).toPose2d()): Target(TargetType.CoralStation, APRIL_TAG_FIELD_LAYOUT.getTagPose(13)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(14).toPose2d()): Target(TargetType.Barge, APRIL_TAG_FIELD_LAYOUT.getTagPose(14)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(15).toPose2d()): Target(TargetType.Barge, APRIL_TAG_FIELD_LAYOUT.getTagPose(15)),
-          utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(16).toPose2d()): Target(TargetType.AlgaeProcessor, APRIL_TAG_FIELD_LAYOUT.getTagPose(16)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(17).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(17)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(18).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(18)),
           utils.getTargetHash(APRIL_TAG_FIELD_LAYOUT.getTagPose(19).toPose2d()): Target(TargetType.Reef, APRIL_TAG_FIELD_LAYOUT.getTagPose(19)),
@@ -162,27 +174,13 @@ class Game:
 
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
-          TargetAlignmentLocation.Default: Transform3d(),
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(20), 0, 0, Rotation3d()),
           TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(20), units.inchesToMeters(-6.5), 0, Rotation3d()),
           TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(20), units.inchesToMeters(6.5), 0, Rotation3d())
         },
         TargetType.CoralStation: {
-          TargetAlignmentLocation.Default: Transform3d(),
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
           TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(22), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
           TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(22), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
-        },
-        TargetType.AlgaeProcessor: {
-          TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(24), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(24), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(24), 0, 0, Rotation3d())
-        },
-        TargetType.Barge: {
-          TargetAlignmentLocation.Default: Transform3d(),
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(12), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(12), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(12), 0, 0, Rotation3d())
         }
       }

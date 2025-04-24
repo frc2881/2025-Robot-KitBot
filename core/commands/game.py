@@ -7,40 +7,40 @@ if TYPE_CHECKING: from core.robot import RobotCore
 from core.classes import TargetAlignmentLocation, TargetType
 import core.constants as constants
 
-class GameCommands:
+class Game:
   def __init__(
       self,
       robot: "RobotCore"
     ) -> None:
     self._robot = robot
 
-  def alignRobotToTargetCommand(
-      self, 
-      targetAlignmentMode: TargetAlignmentMode, 
-      targetAlignmentLocation: TargetAlignmentLocation = TargetAlignmentLocation.Default, 
-      targetType: TargetType = TargetType.Default
-    ) -> Command:
-    return self._robot.driveSubsystem.alignToTargetCommand(
-      self._robot.localizationService.getRobotPose, 
-      self._robot.localizationService.getTargetPose,
-      targetAlignmentMode,
-      targetAlignmentLocation,
-      targetType
+  def alignRobotToTarget(self, targetAlignmentMode: TargetAlignmentMode, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return self._robot.drive.alignToTarget(
+      self._robot.localization.getRobotPose, 
+      lambda: self._robot.localization.getTargetPose(targetAlignmentLocation),
+      targetAlignmentMode
     ).until(
-      lambda: self._robot.driveSubsystem.isAlignedToTarget()
+      lambda: self.isRobotAlignedToTarget()
     ).withTimeout(
       constants.Game.Commands.kTargetAlignmentTimeout
     ).andThen(
-      self.rumbleControllersCommand(ControllerRumbleMode.Driver, ControllerRumblePattern.Short)
-    ).withName("GameCommands:AlignRobotToTarget")
+      self.rumbleControllers(ControllerRumbleMode.Driver)
+    ).withName(f'Game:AlignRobotToTarget:{ targetAlignmentMode.name }:{ targetAlignmentLocation.name }')
+  
+  def isRobotAlignedToTarget(self) -> bool:
+    return self._robot.drive.isAlignedToTarget()
 
-  def scoreCommand(self) -> Command:
-    return self._robot.rollerSubsystem.ejectCommand().withTimeout(0.75).withName("GameCommands:Score")
+  def scoreCoral(self) -> Command:
+    return self._robot.roller.eject().withTimeout(0.75).withName("GameCommands:Score")
 
-  def rumbleControllersCommand(self, mode: ControllerRumbleMode, pattern: ControllerRumblePattern) -> Command:
+  def rumbleControllers(
+    self, 
+    mode: ControllerRumbleMode = ControllerRumbleMode.Both, 
+    pattern: ControllerRumblePattern = ControllerRumblePattern.Short
+  ) -> Command:
     return cmd.parallel(
-      self._robot.driverController.rumbleCommand(pattern).onlyIf(lambda: mode == ControllerRumbleMode.Driver or mode == ControllerRumbleMode.Both),
-      self._robot.operatorController.rumbleCommand(pattern).onlyIf(lambda: mode == ControllerRumbleMode.Operator or mode == ControllerRumbleMode.Both)
+      self._robot.driver.rumble(pattern).onlyIf(lambda: mode != ControllerRumbleMode.Operator),
+      self._robot.operator.rumble(pattern).onlyIf(lambda: mode != ControllerRumbleMode.Driver)
     ).onlyIf(
       lambda: RobotBase.isReal() and not utils.isAutonomousMode()
-    ).withName("GameCommands:RumbleControllers")
+    ).withName(f'Game:RumbleControllers:{ mode.name }:{ pattern.name }')

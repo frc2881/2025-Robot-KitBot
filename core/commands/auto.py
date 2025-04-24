@@ -8,26 +8,13 @@ from pathplannerlib.path import PathPlannerPath
 from lib import logger, utils
 from lib.classes import Alliance, TargetAlignmentMode
 if TYPE_CHECKING: from core.robot import RobotCore
-from core.classes import TargetAlignmentLocation, TargetPositionType, GamePiece
+from core.classes import TargetAlignmentLocation
 import core.constants as constants
 
 class AutoPath(Enum):
-  Start1_1 = auto()
   Start2_2 = auto()
-  Start3_3 = auto()
-  Pickup1_1 = auto()
-  Pickup2_2 = auto()
-  Pickup3_2 = auto()
-  Pickup4_2 = auto()
-  Pickup5_1 = auto()
-  Pickup6_1 = auto()
-  Move1_5 = auto()
-  Move1_6 = auto()
-  Move2_3 = auto()
-  Move2_4 = auto()
-  Move2_5 = auto()
 
-class AutoCommands:
+class Auto:
   def __init__(
       self,
       robot: "RobotCore"
@@ -35,40 +22,30 @@ class AutoCommands:
     self._robot = robot
 
     self._paths = { path: PathPlannerPath.fromPathFile(path.name) for path in AutoPath }
-    self._selectedAutoCommand = cmd.none()
+    self._auto = cmd.none()
 
     AutoBuilder.configure(
-      self._robot.localizationService.getRobotPose, 
-      self._robot.localizationService.resetRobotPose, 
-      self._robot.driveSubsystem.getChassisSpeeds, 
-      self._robot.driveSubsystem.drive, 
+      self._robot.localization.getRobotPose, 
+      self._robot.localization.resetRobotPose,
+      self._robot.drive.getChassisSpeeds, 
+      self._robot.drive.drive, 
       constants.Subsystems.Drive.kPathPlannerController,
       constants.Subsystems.Drive.kPathPlannerRobotConfig,
       lambda: utils.getAlliance() == Alliance.Red,
-      self._robot.driveSubsystem
+      self._robot.drive
     )
 
-    self._autoCommandChooser = SendableChooser()
-    self._autoCommandChooser.setDefaultOption("None", cmd.none)
-
-    self._autoCommandChooser.addOption("[1]_1_", self.auto_1_1_)
-    self._autoCommandChooser.addOption("[1]_1_6", self.auto_1_1_6)
-    self._autoCommandChooser.addOption("[1]_1_6_6", self.auto_1_1_6_6)
-    self._autoCommandChooser.addOption("[1]_1_6_6_5", self.auto_1_1_6_6_5)
-    self._autoCommandChooser.addOption("[2]_2", self.auto_2_2)
-    self._autoCommandChooser.addOption("[2]_2_3", self.auto_2_2_3)
-    self._autoCommandChooser.addOption("[2]_2_3_3", self.auto_2_2_3_3)
-    self._autoCommandChooser.addOption("[3]_3_", self.auto_3_3_)
-    self._autoCommandChooser.addOption("[3]_3_4", self.auto_3_3_4)
-    self._autoCommandChooser.addOption("[3]_3_4_4", self.auto_3_3_4_4)
-    self._autoCommandChooser.addOption("[3]_3_4_4_5", self.auto_3_3_4_4_5)
-    self._autoCommandChooser.addOption("[3]_3_4_4_5_6", self.auto_3_3_4_4_5_6)
+    self._autos = SendableChooser()
+    self._autos.setDefaultOption("None", cmd.none)
     
-    self._autoCommandChooser.onChange(lambda autoCommand: setattr(self, "_selectedAutoCommand", autoCommand()))
-    SmartDashboard.putData("Robot/Auto/Command", self._autoCommandChooser)
+    self._autos.addOption("[2]_2", self.auto_2_2)
 
-  def getSelected(self) -> Command:
-    return self._selectedAutoCommand
+    self._autos.onChange(lambda auto: setattr(self, "_auto", auto()))
+
+    SmartDashboard.putData("Robot/Auto", self._autos)
+
+  def get(self) -> Command:
+    return self._auto
   
   def _reset(self, path: AutoPath) -> Command:
     return cmd.sequence(
@@ -76,249 +53,19 @@ class AutoCommands:
       cmd.waitSeconds(0.1)
     )
   
-  def _start(self) -> Command:
-    return cmd.none()
-
   def _move(self, path: AutoPath) -> Command:
     return AutoBuilder.followPath(self._paths.get(path)).withTimeout(constants.Game.Commands.kAutoMoveTimeout)
   
   def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
-    return self._robot.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, targetAlignmentLocation)
+    return self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
 
-  def _score(self) -> Command:
-    return self._robot.gameCommands.scoreCommand()
+  def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return (
+      self._move(autoPath).andThen(self._alignToTarget(targetAlignmentLocation)).andThen(self._robot.game.scoreCoral())
+    )
 
-  def _getStartingPose(self, position: int) -> Pose2d:
-    match position:
-      case 1:
-        return self._paths.get(AutoPath.Start1_1).getStartingHolonomicPose()
-      case 2: 
-        return self._paths.get(AutoPath.Start2_2).getStartingHolonomicPose()
-      case 3:
-        return self._paths.get(AutoPath.Start3_3).getStartingHolonomicPose()
-      case _:
-        return None
-  
-  def moveToStartingPosition(self, position: int) -> Command:
-    return AutoBuilder.pathfindToPose(
-      self._getStartingPose(position), 
-      constants.Subsystems.Drive.kPathPlannerConstraints
-    ).onlyIf(
-      lambda: not utils.isCompetitionMode()
-    ).withName("AutoCommands:MoveToStartingPosition")
-
-  def auto_1_1_(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start1_1),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup1_1),
-      self._alignToTarget(TargetAlignmentLocation.Center)
-    ).withName("AutoCommands:[1]_1_")
-  
-  def auto_1_1_6(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start1_1),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup1_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score()
-    ).withName("AutoCommands:[1]_1_6")
-  
-  def auto_1_1_6_6(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start1_1),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup1_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score(),
-      self._move(AutoPath.Pickup6_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score()
-    ).withName("AutoCommands:[1]_1_6_6")
-  
-  def auto_1_1_6_6_5(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start1_1),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup1_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score(),
-      self._move(AutoPath.Pickup6_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-       self._move(AutoPath.Pickup6_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_5),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score()
-    ).withName("AutoCommands:[1]_1_6_6_5")
-  
   def auto_2_2(self) -> Command:
     return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start2_2),
-      self._alignToTarget(TargetAlignmentLocation.Center), 
-      self._score()
+      self._moveAlignScore(AutoPath.Start2_2, TargetAlignmentLocation.Center)
     ).withName("AutoCommands:[2]_2")
-  
-  def auto_2_2_3(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start2_2),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup2_2),
-      self._alignToTarget(TargetAlignmentLocation.Left),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_3),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score()
-    ).withName("AutoCommands:[2]_2_3")
-  
-  def auto_2_2_3_3(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start2_2),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup2_2),
-      self._alignToTarget(TargetAlignmentLocation.Left),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_3),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Left),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_3),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score()
-    ).withName("AutoCommands:[2]_2_3_3")
-
-  def auto_3_3_(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start3_3),
-      self._alignToTarget(TargetAlignmentLocation.Center), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Center)
-    ).withName("AutoCommands:[3]_3_")
-  
-  def auto_3_3_4(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start3_3),
-      self._alignToTarget(TargetAlignmentLocation.Center), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Center), 
-      self._score()
-    ).withName("AutoCommands:[3]_3_4")
-  
-  def auto_3_3_4_4(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start3_3),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score(),
-      self._move(AutoPath.Pickup4_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score()
-    ).withName("AutoCommands:[3]_3_4_4")
-  
-  def auto_3_3_4_4_5(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start3_3),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score(),
-      self._move(AutoPath.Pickup4_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup4_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_5),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score()
-    ).withName("AutoCommands:[3]_3_4_4_5")
-  
-  def auto_3_3_4_4_5_6(self) -> Command:
-    return cmd.sequence(
-      self._start(),
-      self._move(AutoPath.Start3_3),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup3_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score(),
-      self._move(AutoPath.Pickup4_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_4),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup4_2),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move2_5),
-      self._alignToTarget(TargetAlignmentLocation.Left), 
-      self._score(),
-      self._move(AutoPath.Pickup5_1),
-      self._alignToTarget(TargetAlignmentLocation.Center),
-      cmd.waitSeconds(1.0),
-      self._move(AutoPath.Move1_6),
-      self._alignToTarget(TargetAlignmentLocation.Right), 
-      self._score()
-    ).withName("AutoCommands:[3]_3_4_4_5_6")
-
-  
+ 

@@ -3,32 +3,15 @@ from dataclasses import dataclass
 from wpimath import units
 from wpimath.geometry import Pose2d, Pose3d
 
-class GamePiece(Enum):
-  Coral = auto()
-  Algae = auto()
-
 class TargetType(Enum):
-  Default = auto()
   Reef = auto()
   CoralStation = auto()
-  AlgaeProcessor = auto()
-  Barge = auto()
 
 class TargetPositionType(Enum):
-  ReefCoralL4 = auto()
-  ReefAlgaeL3 = auto()
-  ReefCoralL3 = auto()
-  ReefAlgaeL2 = auto()
-  ReefCoralL2 = auto()
   ReefCoralL1 = auto()
   CoralStation = auto()
-  AlgaeProcessor = auto()
-  Barge = auto()
-  CageEntry = auto()
-  CageClimb = auto()
 
 class TargetAlignmentLocation(Enum):
-  Default = auto()
   Center = auto()
   Left = auto()
   Right = auto()

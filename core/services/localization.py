@@ -1,16 +1,16 @@
 from typing import Callable
 from ntcore import NetworkTableInstance
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, Timer
 from wpimath.geometry import Rotation2d, Pose2d, Pose3d
 from wpimath.kinematics import SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from photonlibpy.photonPoseEstimator import PoseStrategy
-from lib.sensors.pose_sensor import PoseSensor
+from lib.sensors.pose import PoseSensor
 from lib import logger, utils
-from core.classes import Target, TargetAlignmentLocation, TargetType
+from core.classes import Target, TargetType, TargetAlignmentLocation
 import core.constants as constants
 
-class LocalizationService():
+class Localization():
   def __init__(
       self,
       getGyroRotation: Callable[[], Rotation2d],
@@ -35,10 +35,12 @@ class LocalizationService():
     self._robotPose = Pose2d()
     self._targets: dict[int, Target] = {}
     self._targetPoses: list[Pose2d] = []
+    self._hasValidVisionTarget: bool = False
+    self._validVisionTargetBufferTimer = Timer()
     
     self._robotPosePublisher = NetworkTableInstance.getDefault().getStructTopic("/SmartDashboard/Robot/Localization/Pose", Pose2d).publish()
-    SmartDashboard.putNumber("Robot/Game/Field/Length", constants.Game.Field.kLength)
-    SmartDashboard.putNumber("Robot/Game/Field/Width", constants.Game.Field.kWidth)
+    SmartDashboard.putNumber("Game/Field/Length", constants.Game.Field.kLength)
+    SmartDashboard.putNumber("Game/Field/Width", constants.Game.Field.kWidth)
 
     utils.addRobotPeriodic(self._periodic)
 
@@ -48,19 +50,29 @@ class LocalizationService():
     self._updateTelemetry()
 
   def _updateRobotPose(self) -> None:
+    hasVisionTarget = False
     self._poseEstimator.update(self._getGyroRotation(), self._getModulePositions())
     for poseSensor in self._poseSensors:
       estimatedRobotPose = poseSensor.getEstimatedRobotPose()
       if estimatedRobotPose is not None:
         pose = estimatedRobotPose.estimatedPose.toPose2d()
         if utils.isPoseInBounds(pose, constants.Game.Field.kBounds):
-          if estimatedRobotPose.strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR:
-            self._poseEstimator.addVisionMeasurement(pose, estimatedRobotPose.timestampSeconds)
-          else:
-            ambiguity = sum(target.getPoseAmbiguity() for target in estimatedRobotPose.targetsUsed) / len(estimatedRobotPose.targetsUsed)
-            if utils.isValueInRange(ambiguity, 0, constants.Services.Localization.kVisionMaxPoseAmbiguity):
-              self._poseEstimator.addVisionMeasurement(pose, estimatedRobotPose.timestampSeconds)
+          for target in estimatedRobotPose.targetsUsed:
+            if target.getBestCameraToTarget().translation().norm() <= constants.Services.Localization.kVisionMaxTargetDistance:
+              if (
+                estimatedRobotPose.strategy == PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR or 
+                utils.isValueInRange(target.getPoseAmbiguity(), 0, constants.Services.Localization.kVisionMaxPoseAmbiguity)
+              ):
+                self._poseEstimator.addVisionMeasurement(pose, estimatedRobotPose.timestampSeconds)
+                hasVisionTarget = True
+                break
     self._robotPose = self._poseEstimator.getEstimatedPosition()
+    if hasVisionTarget:
+      self._hasValidVisionTarget = True
+      self._validVisionTargetBufferTimer.restart()
+    else:
+      if self._hasValidVisionTarget and self._validVisionTargetBufferTimer.hasElapsed(0.1):
+        self._hasValidVisionTarget = False
 
   def getRobotPose(self) -> Pose2d:
     return self._robotPose
@@ -74,17 +86,13 @@ class LocalizationService():
       self._targets = constants.Game.Field.Targets.kTargets[self._alliance]
       self._targetPoses = [t.pose.toPose2d() for t in self._targets.values()]
 
-  def getTargetPose(self, targetAlignmentLocation: TargetAlignmentLocation, targetType: TargetType) -> Pose3d:
-    match targetType:
-      case _:
-        target = self._targets.get(utils.getTargetHash(self._robotPose.nearest(self._targetPoses)))
-        return target.pose.transformBy(constants.Game.Field.Targets.kTargetAlignmentTransforms[target.type][targetAlignmentLocation])
+  def getTargetPose(self, targetAlignmentLocation: TargetAlignmentLocation) -> Pose3d:
+    target = self._targets.get(utils.getTargetHash(self._robotPose.nearest(self._targetPoses)))
+    return target.pose.transformBy(constants.Game.Field.Targets.kTargetAlignmentTransforms[target.type][targetAlignmentLocation])
 
-  def hasVisionTarget(self) -> bool:
-    for poseSensor in self._poseSensors:
-      if poseSensor.hasTarget():
-        return True
-    return False
+  def hasValidVisionTarget(self) -> bool:
+    return self._hasValidVisionTarget
 
   def _updateTelemetry(self) -> None:
+    SmartDashboard.putBoolean("Robot/Localization/HasValidVisionTarget", self._hasValidVisionTarget)
     self._robotPosePublisher.set(self._robotPose)

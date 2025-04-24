@@ -2,15 +2,15 @@ from commands2 import Command, cmd
 from wpilib import DriverStation, SmartDashboard
 from lib import logger, utils
 from lib.classes import TargetAlignmentMode
-from lib.controllers.game_controller import GameController
-from lib.sensors.gyro_sensor_navx2 import GyroSensor_NAVX2
-from lib.sensors.pose_sensor import PoseSensor
-from core.commands.auto import AutoCommands
-from core.commands.game import GameCommands
-from core.subsystems.drive import DriveSubsystem
-from core.subsystems.roller import RollerSubsystem
-from core.services.localization import LocalizationService
-from core.classes import TargetAlignmentLocation, TargetType
+from lib.controllers.xbox import Xbox
+from lib.sensors.gyro_navx2 import Gyro_NAVX2
+from lib.sensors.pose import PoseSensor
+from core.commands.auto import Auto
+from core.commands.game import Game
+from core.subsystems.drive import Drive
+from core.subsystems.roller import Roller
+from core.services.localization import Localization
+from core.classes import TargetAlignmentLocation
 import core.constants as constants
 
 class RobotCore:
@@ -24,57 +24,54 @@ class RobotCore:
     utils.addRobotPeriodic(self._periodic)
 
   def _initSensors(self) -> None:
-    self.gyroSensor = GyroSensor_NAVX2(constants.Sensors.Gyro.NAVX2.kComType)
+    self.gyro = Gyro_NAVX2(constants.Sensors.Gyro.NAVX2.kComType)
     self.poseSensors = tuple(PoseSensor(c) for c in constants.Sensors.Pose.kPoseSensorConfigs)
     SmartDashboard.putString("Robot/Sensors/Camera/Streams", utils.toJson(constants.Sensors.Camera.kStreams))
     
   def _initSubsystems(self) -> None:
-    self.driveSubsystem = DriveSubsystem(self.gyroSensor.getHeading)
-    self.rollerSubsystem = RollerSubsystem()
+    self.drive = Drive(self.gyro.getHeading)
+    self.roller = Roller()
     
   def _initServices(self) -> None:
-    self.localizationService = LocalizationService(self.gyroSensor.getRotation, self.driveSubsystem.getModulePositions, self.poseSensors)
+    self.localization = Localization(self.gyro.getRotation, self.drive.getModulePositions, self.poseSensors)
 
   def _initControllers(self) -> None:
-    self.driverController = GameController(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
-    self.operatorController = GameController(constants.Controllers.kOperatorControllerPort, constants.Controllers.kInputDeadband)
-    DriverStation.silenceJoystickConnectionWarning(True)
+    self.driver = Xbox(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
+    self.operator = Xbox(constants.Controllers.kOperatorControllerPort, constants.Controllers.kInputDeadband)
+    DriverStation.silenceJoystickConnectionWarning(not utils.isCompetitionMode())
 
   def _initCommands(self) -> None:
-    self.gameCommands = GameCommands(self)
-    self.autoCommands = AutoCommands(self)
+    self.game = Game(self)
+    self.auto = Auto(self)
 
   def _initTriggers(self) -> None:
-    self._setupDriverControls()
-    self._setupOperatorControls()
+    self._setupDriver()
+    self._setupOperator()
 
-  def _setupDriverControls(self) -> None:
-    self.driveSubsystem.setDefaultCommand(
-      self.driveSubsystem.driveCommand(
-        self.driverController.getLeftY,
-        self.driverController.getLeftX,
-        self.driverController.getRightX
-    ))
-    self.driverController.rightStick().and_((self.driverController.rightBumper().or_(self.driverController.leftBumper()).or_(self.driverController.leftTrigger())).negate()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center))
-    self.driverController.rightStick().and_(self.driverController.rightBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
-    self.driverController.rightStick().and_(self.driverController.leftBumper()).whileTrue(self.gameCommands.alignRobotToTargetCommand(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))    
-    self.driverController.leftStick().whileTrue(self.driveSubsystem.lockCommand())
-    self.driverController.rightTrigger().whileTrue(self.rollerSubsystem.ejectCommand())
+  def _setupDriver(self) -> None:
+    self.drive.setDefaultCommand(
+      self.drive.default(self.driver.getLeftY, self.driver.getLeftX, self.driver.getRightX)
+    )
+    self.driver.rightStick().and_((self.driver.rightBumper().or_(self.driver.leftBumper()).or_(self.driver.leftTrigger())).negate()).whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center))
+    self.driver.rightStick().and_(self.driver.rightBumper()).whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
+    self.driver.rightStick().and_(self.driver.leftBumper()).whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))    
+    self.driver.leftStick().whileTrue(self.drive.lock())
+    self.driver.rightTrigger().whileTrue(self.roller.eject())
     # self.driverController.rightBumper().whileTrue(cmd.none())
     # self.driverController.leftTrigger().whileTrue(cmd.none())
     # self.driverController.leftBumper().whileTrue(cmd.none())
-    self.driverController.povUp().whileTrue(self.autoCommands.moveToStartingPosition(2))
+    # self.driverController.povUp().whileTrue(cmd.none())
     # self.driverController.povDown().whileTrue(cmd.none())
-    self.driverController.povLeft().whileTrue(self.autoCommands.moveToStartingPosition(1))
-    self.driverController.povRight().whileTrue(self.autoCommands.moveToStartingPosition(3))
+    # self.driverController.povLeft().whileTrue(cmd.none())
+    # self.driverController.povRight().whileTrue(cmd.none())
     # self.driverController.a().whileTrue(cmd.none())
     # self.driverController.b().whileTrue(cmd.none())
     # self.driverController.y().whileTrue(cmd.none())
     # self.driverController.x().whileTrue(cmd.none())
-    self.driverController.start().onTrue(self.gyroSensor.calibrateCommand())
-    self.driverController.back().onTrue(self.gyroSensor.resetCommand())
+    # self.driverController.start().onTrue(cmd.none())
+    self.driver.back().onTrue(self.gyro.reset())
 
-  def _setupOperatorControls(self) -> None:
+  def _setupOperator(self) -> None:
     pass
     # self.operatorController.rightTrigger().whileTrue(cmd.none())
     # self.operatorController.rightBumper().whileTrue(cmd.none())
@@ -94,26 +91,29 @@ class RobotCore:
   def _periodic(self) -> None:
     self._updateTelemetry()
 
-  def getAutoCommand(self) -> Command:
-    return self.autoCommands.getSelected()
+  def disabledInit(self) -> None:
+    self.reset()
 
   def autoInit(self) -> None:
-    self.resetRobot()
+    self.reset()
 
   def autoExit(self) -> None: 
-    self.gyroSensor.resetRobotToField(self.localizationService.getRobotPose())
+    self.gyro.resetRobotToField(self.localization.getRobotPose())
 
   def teleopInit(self) -> None:
-    self.resetRobot()
+    self.reset()
 
   def testInit(self) -> None:
-    self.resetRobot()
+    self.reset()
 
-  def resetRobot(self) -> None:
-    self.driveSubsystem.reset()
+  def simulationInit(self) -> None:
+    self.reset()
 
-  def _robotHasInitialZeroResets(self) -> bool:
+  def reset(self) -> None:
+    self.drive.reset()
+
+  def _hasAllZeroResets(self) -> bool:
     return utils.isCompetitionMode() or True
 
   def _updateTelemetry(self) -> None:
-    SmartDashboard.putBoolean("Robot/HasInitialZeroResets", self._robotHasInitialZeroResets())
+    SmartDashboard.putBoolean("Robot/Status/HasAllZeroResets", self._hasAllZeroResets())
