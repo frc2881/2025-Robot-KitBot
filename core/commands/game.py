@@ -31,7 +31,7 @@ class Game:
     return self._robot.drive.isAlignedToTarget()
 
   def scoreCoral(self) -> Command:
-    return self._robot.roller.eject().withTimeout(0.75).withName("GameCommands:Score")
+    return self._robot.roller.score().withTimeout(0.75).withName("GameCommands:Score")
 
   def rumbleControllers(
     self, 

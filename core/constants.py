@@ -75,20 +75,20 @@ class Subsystems:
     )
 
     kTargetAlignmentConstants = TargetAlignmentConstants(
+      translationPID = PID(5.0, 0, 0),
+      translationTolerance = Tolerance(0.025, 0.05),
+      translationSpeedMax = kTranslationSpeedMax * 0.25,   
       rotationPID = PID(0.1, 0, 0),
       rotationTolerance = Tolerance(0.25, 0.5),
       rotationSpeedMax = kRotationSpeedMax * 0.25, 
       rotationHeadingModeOffset = 0.0,
-      rotationTranslationModeOffset = 180,
-      translationPID = PID(5.0, 0, 0),
-      translationTolerance = Tolerance(0.025, 0.05),
-      translationSpeedMax = kTranslationSpeedMax * 0.25
+      rotationTranslationModeOffset = 180
     )
 
   class Roller:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorEjectSpeed: float = 0.2
+    kRollerMotorScoreSpeed: float = 0.2
 
 class Services:
   class Localization:
@@ -139,8 +139,7 @@ class Controllers:
 
 class Game:
   class Commands:
-    kTargetAlignmentTimeout: units.seconds = 2.0
-    kAutoMoveTimeout: units.seconds = 4.0
+    kTargetAlignmentTimeout: units.seconds = 1.5
 
   class Field:
     kAprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT

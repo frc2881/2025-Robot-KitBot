@@ -25,12 +25,12 @@ class Roller(Subsystem):
   def periodic(self) -> None:
     self._updateTelemetry()
 
-  def eject(self) -> Command:
+  def score(self) -> Command:
     return self.run(
-      lambda: self._motor.set(self._constants.kRollerMotorEjectSpeed)
+      lambda: self._motor.set(self._constants.kRollerMotorScoreSpeed)
     ).finallyDo(
       lambda end: self._motor.stopMotor()
-    ).withName("Roller:Eject")
+    ).withName("Roller:Score")
   
   def reset(self) -> None:
     self._motor.stopMotor()

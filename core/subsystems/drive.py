@@ -81,12 +81,7 @@ class Drive(Subsystem):
   def periodic(self) -> None:
     self._updateTelemetry()
 
-  def default(
-      self, 
-      getInputX: Callable[[], units.percent], 
-      getInputY: Callable[[], units.percent], 
-      getInputRotation: Callable[[], units.percent]
-    ) -> Command:
+  def drive(self, getInputX: Callable[[], units.percent], getInputY: Callable[[], units.percent], getInputRotation: Callable[[], units.percent]) -> Command:
     return self.run(
       lambda: self._drive(getInputX(), getInputY(), getInputRotation())
     ).onlyIf(
@@ -117,15 +112,19 @@ class Drive(Subsystem):
     speedY: units.meters_per_second = inputY * self._constants.kTranslationSpeedMax
     speedRotation: units.radians_per_second = inputRotation * self._constants.kRotationSpeedMax
     
-    if self._orientation == DriveOrientation.Field:
-      self.drive(ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedRotation, Rotation2d.fromDegrees(self._getGyroHeading())))
-    else:
-      self.drive(ChassisSpeeds(speedX, speedY, speedRotation))      
-
-  def drive(self, chassisSpeeds: ChassisSpeeds, driveFeedforwards: DriveFeedforwards = None) -> None:
+    self.setChassisSpeeds(
+      ChassisSpeeds.fromFieldRelativeSpeeds(speedX, speedY, speedRotation, Rotation2d.fromDegrees(self._getGyroHeading()))
+      if self._orientation == DriveOrientation.Field else
+      ChassisSpeeds(speedX, speedY, speedRotation)
+    )
+   
+  def setChassisSpeeds(self, chassisSpeeds: ChassisSpeeds, driveFeedforwards: DriveFeedforwards = None) -> None:
     self._setSwerveModuleStates(chassisSpeeds)
     if chassisSpeeds.vx != 0 or chassisSpeeds.vy != 0:
       self._resetTargetAlignment()
+
+  def getChassisSpeeds(self) -> ChassisSpeeds:
+    return self._constants.kDriveKinematics.toChassisSpeeds(self._getSwerveModuleStates())
 
   def _setSwerveModuleStates(self, chassisSpeeds: ChassisSpeeds) -> None: 
     swerveModuleStates = SwerveDrive4Kinematics.desaturateWheelSpeeds(
@@ -148,9 +147,6 @@ class Drive(Subsystem):
 
   def getModulePositions(self) -> tuple[SwerveModulePosition, ...]:
     return tuple(m.getPosition() for m in self._swerveModules)
-
-  def getChassisSpeeds(self) -> ChassisSpeeds:
-    return self._constants.kDriveKinematics.toChassisSpeeds(self._getSwerveModuleStates())
 
   def _setIdleMode(self, idleMode: MotorIdleMode) -> None:
     for m in self._swerveModules: m.setIdleMode(idleMode)
@@ -226,7 +222,7 @@ class Drive(Subsystem):
         self._constants.kTargetAlignmentConstants.rotationSpeedMax
       )
     self._setSwerveModuleStates(ChassisSpeeds(speedTranslationX, speedTranslationY, speedRotation))
-    if speedRotation == 0 and speedTranslationX == 0 and speedTranslationY == 0:
+    if speedTranslationX == 0 and speedTranslationY == 0 and speedRotation == 0:
       self._isAlignedToTarget = True
       self._isAligningToTarget = False
 
@@ -242,7 +238,7 @@ class Drive(Subsystem):
     self._isAligningToTarget = False
 
   def reset(self) -> None:
-    self.drive(ChassisSpeeds())
+    self.setChassisSpeeds(ChassisSpeeds())
     self._resetTargetAlignment()
   
   def _updateTelemetry(self) -> None:
