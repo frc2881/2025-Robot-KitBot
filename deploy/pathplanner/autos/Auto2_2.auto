@@ -7,13 +7,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Start2_2"
+            "pathName": "Start2_2.0"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AlignCenter"
+            "name": "Score"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score"
           }
         },
         {

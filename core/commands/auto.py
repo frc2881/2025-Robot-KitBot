@@ -64,7 +64,7 @@ class Auto:
     return self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
   
   def _intake(self) -> Command:
-    return cmd.waitSeconds(1.0) # TODO: replace with intake sensor once installed and enabled
+    return cmd.waitSeconds(2.0) # TODO: replace with intake sensor once installed and enabled
 
   def _score(self) -> Command:
     return self._robot.game.scoreCoral()
