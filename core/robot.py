@@ -33,7 +33,11 @@ class RobotCore:
     self.roller = Roller()
     
   def _initServices(self) -> None:
-    self.localization = Localization(self.gyro.getRotation, self.drive.getModulePositions, self.poseSensors)
+    self.localization = Localization(
+      self.gyro.getRotation, 
+      self.drive.getModulePositions, 
+      self.poseSensors
+    )
 
   def _initControllers(self) -> None:
     self.driver = Xbox(constants.Controllers.kDriverControllerPort, constants.Controllers.kInputDeadband)
@@ -56,13 +60,10 @@ class RobotCore:
     self.driver.leftStick().whileTrue(self.drive.lock())
     self.driver.rightTrigger().whileTrue(self.roller.score())
     # self.driver.leftTrigger().whileTrue(cmd.none())
-    self.driver.rightBumper().and_(self.operator.leftBumper()).whileTrue(
-      self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Center)
-    )
-    self.driver.rightBumper().and_((self.operator.leftBumper()).not_()).whileTrue(
+    self.driver.rightBumper().whileTrue(
       self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right)
     )
-    self.driver.leftBumper().and_((self.operator.rightBumper()).not_()).whileTrue(
+    self.driver.leftBumper().whileTrue(
       self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left)
     )
     # self.driver.povUp().whileTrue(cmd.none())
