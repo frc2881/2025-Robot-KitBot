@@ -11,7 +11,7 @@ import core.constants as constants
 
 class AutoName(Enum):
   Default = auto()
-  Auto2_2 = auto()
+  Auto2R_2L = auto()
 
 class CommandName(Enum):
   IntakeCoral = auto()
@@ -43,7 +43,7 @@ class Auto:
     self._autos = SendableChooser()
     self._autos.setDefaultOption("None", AutoName.Default)
     
-    self._autos.addOption("[2]_2", AutoName.Auto2_2)
+    self._autos.addOption("[2R]_2L", AutoName.Auto2R_2L)
 
     self._autos.onChange(lambda auto: self._set(auto))
     SmartDashboard.putData("Robot/Auto", self._autos)
