@@ -14,7 +14,6 @@ class AutoName(Enum):
   Auto2_2 = auto()
 
 class CommandName(Enum):
-  AlignCenter = auto()
   AlignLeft = auto()
   AlignRight = auto()
   Intake = auto()
@@ -40,7 +39,6 @@ class Auto:
       self._robot.drive
     )
 
-    NamedCommands.registerCommand(CommandName.AlignCenter.name, self._alignToTarget(TargetAlignmentLocation.Center))
     NamedCommands.registerCommand(CommandName.AlignLeft.name, self._alignToTarget(TargetAlignmentLocation.Left))
     NamedCommands.registerCommand(CommandName.AlignRight.name, self._alignToTarget(TargetAlignmentLocation.Right))
     NamedCommands.registerCommand(CommandName.Intake.name, self._intake())

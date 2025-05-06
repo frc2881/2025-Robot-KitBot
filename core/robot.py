@@ -53,19 +53,13 @@ class RobotCore:
     self._setupOperator()
 
   def _setupDriver(self) -> None:
-    self.drive.setDefaultCommand(
-      self.drive.drive(self.driver.getLeftY, self.driver.getLeftX, self.driver.getRightX)
-    )
+    self.drive.setDefaultCommand(self.drive.drive(self.driver.getLeftY, self.driver.getLeftX, self.driver.getRightX))
     # self.driver.rightStick().whileTrue(cmd.none())
     self.driver.leftStick().whileTrue(self.drive.lock())
     self.driver.rightTrigger().whileTrue(self.roller.score())
     # self.driver.leftTrigger().whileTrue(cmd.none())
-    self.driver.rightBumper().whileTrue(
-      self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right)
-    )
-    self.driver.leftBumper().whileTrue(
-      self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left)
-    )
+    self.driver.rightBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
+    self.driver.leftBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))
     # self.driver.povUp().whileTrue(cmd.none())
     # self.driver.povDown().whileTrue(cmd.none())
     # self.driver.povLeft().whileTrue(cmd.none())
