@@ -14,10 +14,8 @@ class AutoName(Enum):
   Auto2_2 = auto()
 
 class CommandName(Enum):
-  AlignLeft = auto()
-  AlignRight = auto()
-  Intake = auto()
-  Score = auto()
+  IntakeCoral = auto()
+  ScoreCoral = auto()
 
 class Auto:
   def __init__(
@@ -39,10 +37,8 @@ class Auto:
       self._robot.drive
     )
 
-    NamedCommands.registerCommand(CommandName.AlignLeft.name, self._alignToTarget(TargetAlignmentLocation.Left))
-    NamedCommands.registerCommand(CommandName.AlignRight.name, self._alignToTarget(TargetAlignmentLocation.Right))
-    NamedCommands.registerCommand(CommandName.Intake.name, self._intake())
-    NamedCommands.registerCommand(CommandName.Score.name, self._score())
+    NamedCommands.registerCommand(CommandName.IntakeCoral.name, self._intakeCoral())
+    NamedCommands.registerCommand(CommandName.ScoreCoral.name, self._scoreCoral())
 
     self._autos = SendableChooser()
     self._autos.setDefaultOption("None", AutoName.Default)
@@ -58,12 +54,9 @@ class Auto:
   def get(self) -> Command:
     return self._auto
   
-  def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
-    return self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
-  
-  def _intake(self) -> Command:
-    return cmd.waitSeconds(2.0) # TODO: replace with intake sensor once installed and enabled
+  def _intakeCoral(self) -> Command:
+    return self._robot.game.intakeCoral()
 
-  def _score(self) -> Command:
+  def _scoreCoral(self) -> Command:
     return self._robot.game.scoreCoral()
  
