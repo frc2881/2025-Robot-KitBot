@@ -19,10 +19,6 @@ class Game:
       self._robot.localization.getRobotPose, 
       lambda: self._robot.localization.getTargetPose(targetAlignmentLocation),
       targetAlignmentMode
-    ).until(
-      lambda: self.isRobotAlignedToTarget()
-    ).withTimeout(
-      constants.Game.Commands.kTargetAlignmentTimeout
     ).andThen(
       self.rumbleControllers(ControllerRumbleMode.Driver)
     ).withName(f'Game:AlignRobotToTarget:{ targetAlignmentMode.name }:{ targetAlignmentLocation.name }')

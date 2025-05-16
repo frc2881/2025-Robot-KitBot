@@ -2,20 +2,19 @@ from typing import TYPE_CHECKING
 from enum import Enum, auto
 from commands2 import Command, cmd
 from wpilib import SendableChooser, SmartDashboard
-from pathplannerlib.auto import AutoBuilder, NamedCommands
+from wpimath.geometry import Transform2d
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.path import PathPlannerPath
 from lib import logger, utils
 from lib.classes import Alliance, TargetAlignmentMode
 if TYPE_CHECKING: from core.robot import RobotCore
 from core.classes import TargetAlignmentLocation
 import core.constants as constants
 
-class AutoName(Enum):
-  Default = auto()
-  Auto2R_2L = auto()
-
-class CommandName(Enum):
-  IntakeCoral = auto()
-  ScoreCoral = auto()
+class AutoPath(Enum):
+  Start_2R_2R = auto()
+  Intake_B = auto()
+  Score_B_2L = auto()
 
 class Auto:
   def __init__(
@@ -24,6 +23,7 @@ class Auto:
     ) -> None:
     self._robot = robot
 
+    self._paths = { path: PathPlannerPath.fromPathFile(path.name) for path in AutoPath }
     self._auto = cmd.none()
 
     AutoBuilder.configure(
@@ -37,26 +37,45 @@ class Auto:
       self._robot.drive
     )
 
-    NamedCommands.registerCommand(CommandName.IntakeCoral.name, self._intakeCoral())
-    NamedCommands.registerCommand(CommandName.ScoreCoral.name, self._scoreCoral())
-
     self._autos = SendableChooser()
-    self._autos.setDefaultOption("None", AutoName.Default)
+    self._autos.setDefaultOption("None", cmd.none)
     
-    self._autos.addOption("[2R]_2L", AutoName.Auto2R_2L)
+    self._autos.addOption("[2R]", self.auto_2R)
 
-    self._autos.onChange(lambda auto: self._set(auto))
+    self._autos.onChange(lambda auto: setattr(self, "_auto", auto()))
     SmartDashboard.putData("Robot/Auto", self._autos)
-
-  def _set(self, auto: AutoName) -> None:
-    self._auto = AutoBuilder.buildAuto(auto.name) if auto != AutoName.Default else cmd.none()
 
   def get(self) -> Command:
     return self._auto
   
-  def _intakeCoral(self) -> Command:
-    return self._robot.game.intakeCoral()
+  def _reset(self, path: AutoPath) -> Command:
+    return cmd.sequence(
+      AutoBuilder.resetOdom(self._paths.get(path).getPathPoses()[0].transformBy(Transform2d(0, 0, self._paths.get(path).getInitialHeading()))),
+      cmd.waitSeconds(0.1)
+    )
+  
+  def _move(self, path: AutoPath) -> Command:
+    return AutoBuilder.followPath(self._paths.get(path))
 
-  def _scoreCoral(self) -> Command:
-    return self._robot.game.scoreCoral()
+  def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
+
+  def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return (
+      self._move(autoPath).andThen(self._alignToTarget(targetAlignmentLocation))
+      .andThen(self._robot.game.scoreCoral())
+    )
+
+  def _moveAlignIntake(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
+    return (
+      self._move(autoPath).andThen(self._alignToTarget(targetAlignmentLocation))
+      .andThen(self._robot.game.intakeCoral())
+    )
+
+  def auto_2R(self) -> Command:
+    return cmd.sequence(
+      self._moveAlignScore(AutoPath.Start_2R_2R, TargetAlignmentLocation.Right),
+      self._moveAlignScore(AutoPath.Intake_B, TargetAlignmentLocation.Center),
+      self._moveAlignScore(AutoPath.Score_B_2L, TargetAlignmentLocation.Left)
+    ).withName("Auto:[2R]")
  

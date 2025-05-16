@@ -67,7 +67,6 @@ class Subsystems:
 
     kPathPlannerRobotConfig = PATHPLANNER_ROBOT_CONFIG
     kPathPlannerController = PPHolonomicDriveController(PIDConstants(5.0, 0, 0), PIDConstants(5.0, 0, 0))
-    kPathPlannerConstraints = PathConstraints(4.8, 3.6, units.degreesToRadians(540), units.degreesToRadians(720))
 
     kDriftCorrectionConstants = DriftCorrectionConstants(
       rotationPID = PID(0.01, 0, 0), 
@@ -76,12 +75,12 @@ class Subsystems:
 
     kTargetAlignmentConstants = TargetAlignmentConstants(
       translationPID = PID(5.0, 0, 0),
-      translationTolerance = Tolerance(0.025, 0.05),
-      translationSpeedMax = kTranslationSpeedMax * 0.25,   
-      rotationPID = PID(0.1, 0, 0),
+      translationTolerance = Tolerance(0.05, 0.1),
+      translationSpeedMax = kTranslationSpeedMax * 0.3,   
+      rotationPID = PID(0.1, 0, 0), # TODO: recalibrate P for target alignment rotation on practice robot
       rotationTolerance = Tolerance(0.25, 0.5),
-      rotationSpeedMax = kRotationSpeedMax * 0.25, 
-      rotationHeadingModeOffset = 0.0,
+      rotationSpeedMax = kRotationSpeedMax * 0.3, 
+      rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180
     )
 
@@ -137,9 +136,9 @@ class Controllers:
   kOperatorControllerPort: int = 1
   kInputDeadband: units.percent = 0.1
 
-class Game:
+class Game: 
   class Commands:
-    kTargetAlignmentTimeout: units.seconds = 1.5
+    pass
 
   class Field:
     kAprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT
@@ -173,9 +172,9 @@ class Game:
 
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(17), 0, 0, Rotation3d()),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(17), units.inchesToMeters(-6.5), 0, Rotation3d()),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(17), units.inchesToMeters(6.5), 0, Rotation3d())
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(17), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(17), units.inchesToMeters(-6.5), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(17), units.inchesToMeters(6.5), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
