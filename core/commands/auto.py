@@ -58,7 +58,10 @@ class Auto:
     return AutoBuilder.followPath(self._paths.get(path))
 
   def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
-    return self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
+    return (
+      self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
+      .withTimeout(3.0)
+    )
 
   def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
@@ -68,14 +71,14 @@ class Auto:
 
   def _moveAlignIntake(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
-      self._move(autoPath).andThen(self._alignToTarget(targetAlignmentLocation))
+      self._move(autoPath)
       .andThen(self._robot.game.intakeCoral())
     )
 
   def auto_2R(self) -> Command:
     return cmd.sequence(
       self._moveAlignScore(AutoPath.Start_2R_2R, TargetAlignmentLocation.Right),
-      self._moveAlignScore(AutoPath.Intake_B, TargetAlignmentLocation.Center),
+      self._moveAlignIntake(AutoPath.Intake_B, TargetAlignmentLocation.Center),
       self._moveAlignScore(AutoPath.Score_B_2L, TargetAlignmentLocation.Left)
     ).withName("Auto:[2R]")
  

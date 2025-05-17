@@ -27,10 +27,18 @@ class Game:
     return self._robot.drive.isAlignedToTarget()
 
   def intakeCoral(self) -> Command:
-    return cmd.waitSeconds(1.5).withName("GameCommands:IntakeCoral") # TODO: replace with intake sensor once installed and enabled
+    return cmd.waitUntil(lambda: self.isIntakeHolding()).withName("GameCommands:IntakeCoral") # TODO: replace with intake sensor once installed and enabled
 
   def scoreCoral(self) -> Command:
-    return self._robot.roller.score().withTimeout(0.75).withName("GameCommands:ScoreCoral")
+    return (
+      self._robot.roller.score()
+      .until(lambda: not self.isIntakeHolding())
+      .andThen(self._robot.roller.score().withTimeout(0.5))
+      .withName("GameCommands:ScoreCoral")
+    )
+  
+  def isIntakeHolding(self) -> bool:
+    return self._robot.intakeSensor.hasTarget()
 
   def rumbleControllers(
     self, 

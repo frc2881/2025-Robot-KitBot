@@ -79,7 +79,7 @@ class Subsystems:
       translationSpeedMax = kTranslationSpeedMax * 0.3,   
       rotationPID = PID(0.1, 0, 0), # TODO: recalibrate P for target alignment rotation on practice robot
       rotationTolerance = Tolerance(0.25, 0.5),
-      rotationSpeedMax = kRotationSpeedMax * 0.3, 
+      rotationSpeedMax = kRotationSpeedMax * 0.5, 
       rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180
     )
@@ -91,15 +91,18 @@ class Subsystems:
 
 class Services:
   class Localization:
-    kStateStandardDeviations: tuple[float, float, float] = (0.04, 0.04, units.degreesToRadians(1))
-    kVisionStandardDeviations: tuple[float, float, float] = (0.4, 0.4, units.degreesToRadians(4))
     kVisionMaxTargetDistance: units.meters = 4.0
     kVisionMaxPoseAmbiguity: units.percent = 0.2
+    kRobotPoseMaxGroundPlaneDelta: units.meters = 0.25
 
 class Sensors: 
   class Gyro:
     class NAVX2:
       kComType = AHRS.NavXComType.kUSB1
+
+  class Binary:
+    class Intake:
+      kChannel = 9
 
   class Pose:
     _poseSensorConstants = PoseSensorConstants(
@@ -172,9 +175,9 @@ class Game:
 
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(17), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(17), units.inchesToMeters(-6.5), 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(17), units.inchesToMeters(6.5), 0, Rotation3d(Rotation2d.fromDegrees(0)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-7.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(7.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),

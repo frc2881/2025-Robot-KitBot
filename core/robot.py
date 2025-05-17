@@ -5,6 +5,7 @@ from lib.classes import TargetAlignmentMode
 from lib.controllers.xbox import Xbox
 from lib.sensors.gyro_navx2 import Gyro_NAVX2
 from lib.sensors.pose import PoseSensor
+from lib.sensors.binary import BinarySensor
 from core.commands.auto import Auto
 from core.commands.game import Game
 from core.subsystems.drive import Drive
@@ -27,10 +28,11 @@ class RobotCore:
     self.gyro = Gyro_NAVX2(constants.Sensors.Gyro.NAVX2.kComType)
     self.poseSensors = tuple(PoseSensor(c) for c in constants.Sensors.Pose.kPoseSensorConfigs)
     SmartDashboard.putString("Robot/Sensors/Camera/Streams", utils.toJson(constants.Sensors.Camera.kStreams))
+    self.intakeSensor = BinarySensor("Intake", constants.Sensors.Binary.Intake.kChannel) 
     
   def _initSubsystems(self) -> None:
     self.drive = Drive(self.gyro.getHeading)
-    self.roller = Roller()
+    self.roller = Roller(self.intakeSensor.hasTarget)
     
   def _initServices(self) -> None:
     self.localization = Localization(
@@ -56,7 +58,7 @@ class RobotCore:
     self.drive.setDefaultCommand(self.drive.drive(self.driver.getLeftY, self.driver.getLeftX, self.driver.getRightX))
     # self.driver.rightStick().whileTrue(cmd.none())
     self.driver.leftStick().whileTrue(self.drive.lock())
-    self.driver.rightTrigger().whileTrue(self.roller.score())
+    self.driver.rightTrigger().whileTrue(self.game.scoreCoral())
     # self.driver.leftTrigger().whileTrue(cmd.none())
     self.driver.rightBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
     self.driver.leftBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))
