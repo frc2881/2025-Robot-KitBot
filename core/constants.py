@@ -141,7 +141,8 @@ class Controllers:
 
 class Game: 
   class Commands:
-    pass
+    kScoreEndingDelay: units.seconds = 0.5
+    kAutoTargetAlignmentTimeout: units.seconds = 3.0
 
   class Field:
     kAprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT

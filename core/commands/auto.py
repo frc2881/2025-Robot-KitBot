@@ -60,12 +60,13 @@ class Auto:
   def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
-      .withTimeout(3.0)
+      .withTimeout(constants.Game.Commands.kAutoTargetAlignmentTimeout)
     )
 
   def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
-      self._move(autoPath).andThen(self._alignToTarget(targetAlignmentLocation))
+      self._move(autoPath)
+      .andThen(self._alignToTarget(targetAlignmentLocation))
       .andThen(self._robot.game.scoreCoral())
     )
 

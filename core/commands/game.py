@@ -15,28 +15,31 @@ class Game:
     self._robot = robot
 
   def alignRobotToTarget(self, targetAlignmentMode: TargetAlignmentMode, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
-    return self._robot.drive.alignToTarget(
-      self._robot.localization.getRobotPose, 
-      lambda: self._robot.localization.getTargetPose(targetAlignmentLocation),
-      targetAlignmentMode
-    ).andThen(
-      self.rumbleControllers(ControllerRumbleMode.Driver)
-    ).withName(f'Game:AlignRobotToTarget:{ targetAlignmentMode.name }:{ targetAlignmentLocation.name }')
+    return (
+      self._robot.drive.alignToTarget(
+        self._robot.localization.getRobotPose, 
+        lambda: self._robot.localization.getTargetPose(targetAlignmentLocation),
+        targetAlignmentMode)
+      .andThen(self.rumbleControllers(ControllerRumbleMode.Driver))
+      .withName(f'Game:AlignRobotToTarget:{ targetAlignmentMode.name }:{ targetAlignmentLocation.name }')
+    )
   
-  def isRobotAlignedToTarget(self) -> bool:
-    return self._robot.drive.isAlignedToTarget()
-
   def intakeCoral(self) -> Command:
-    return cmd.waitUntil(lambda: self.isIntakeHolding()).withName("GameCommands:IntakeCoral") # TODO: replace with intake sensor once installed and enabled
+    return (
+      cmd.waitUntil(lambda: self.isIntakeHolding())
+      .withName("GameCommands:IntakeCoral")
+    )
 
   def scoreCoral(self) -> Command:
     return (
       self._robot.roller.score()
-      .until(lambda: not self.isIntakeHolding())
-      .andThen(self._robot.roller.score().withTimeout(0.5))
+      .raceWith(
+        cmd.waitUntil(lambda: not self.isIntakeHolding())
+        .andThen(cmd.waitSeconds(constants.Game.Commands.kScoreEndingDelay))
+      )
       .withName("GameCommands:ScoreCoral")
     )
-  
+
   def isIntakeHolding(self) -> bool:
     return self._robot.intakeSensor.hasTarget()
 
