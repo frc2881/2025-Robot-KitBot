@@ -45,35 +45,47 @@ class Auto:
     self._autos.onChange(lambda auto: setattr(self, "_auto", auto()))
     SmartDashboard.putData("Robot/Auto", self._autos)
 
+    self._auto = self.auto_2R()
+
   def get(self) -> Command:
     return self._auto
   
   def _reset(self, path: AutoPath) -> Command:
-    return cmd.sequence(
-      AutoBuilder.resetOdom(self._paths.get(path).getPathPoses()[0].transformBy(Transform2d(0, 0, self._paths.get(path).getInitialHeading()))),
-      cmd.waitSeconds(0.1)
+    return (
+      AutoBuilder.resetOdom(self._paths.get(path).getPathPoses()[0].transformBy(Transform2d(0, 0, self._paths.get(path).getInitialHeading())))
+      .andThen(cmd.waitSeconds(0.1))
     )
   
   def _move(self, path: AutoPath) -> Command:
-    return AutoBuilder.followPath(self._paths.get(path))
+    return (
+      AutoBuilder.followPath(self._paths.get(path))
+      .alongWith(logger.log_(f'Auto:Move:{path.name}'))
+    )
 
   def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
       .withTimeout(constants.Game.Commands.kAutoTargetAlignmentTimeout)
+      .alongWith(logger.log_(f'Auto:AlignToTarget:{targetAlignmentLocation.name}'))
     )
 
   def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._move(autoPath)
       .andThen(self._alignToTarget(targetAlignmentLocation))
-      .andThen(self._robot.game.scoreCoral())
+      .andThen(
+        self._robot.game.scoreCoral()
+        .alongWith(logger.log_("Auto:ScoreCoral"))
+      )
     )
 
   def _moveAlignIntake(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._move(autoPath)
-      .andThen(self._robot.game.intakeCoral())
+      .andThen(
+        self._robot.game.intakeCoral()
+        .alongWith(logger.log_("Auto:IntakeCoral"))
+      )
     )
 
   def auto_2R(self) -> Command:
