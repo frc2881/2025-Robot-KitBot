@@ -42,11 +42,14 @@ class Auto:
     
     self._autos.addOption("[2R]", self.auto_2R)
 
-    self._autos.onChange(lambda auto: setattr(self, "_auto", auto()))
+    self._autos.onChange(lambda auto: self.set(auto()))
     SmartDashboard.putData("Robot/Auto", self._autos)
 
   def get(self) -> Command:
     return self._auto
+  
+  def set(self, auto: Command) -> None:
+    self._auto = auto
   
   def _reset(self, path: AutoPath) -> Command:
     return (

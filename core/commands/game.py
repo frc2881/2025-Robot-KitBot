@@ -27,6 +27,7 @@ class Game:
   def intakeCoral(self) -> Command:
     return (
       cmd.waitUntil(lambda: self.isIntakeHolding())
+      .andThen(self.rumbleControllers(ControllerRumbleMode.Driver))
       .withName("GameCommands:IntakeCoral")
     )
 
@@ -37,6 +38,7 @@ class Game:
         cmd.waitUntil(lambda: not self.isIntakeHolding())
         .andThen(cmd.waitSeconds(constants.Game.Commands.kScoreEndingDelay))
       )
+      .andThen(self.rumbleControllers(ControllerRumbleMode.Driver))
       .withName("GameCommands:ScoreCoral")
     )
 

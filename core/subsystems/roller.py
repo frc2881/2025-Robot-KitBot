@@ -32,10 +32,9 @@ class Roller(Subsystem):
     self._updateTelemetry()
 
   def score(self) -> Command:
-    return self.run(
-      lambda: self._motor.set(self._constants.kRollerMotorScoreSpeed)
-    ).finallyDo(
-      lambda end: self._motor.stopMotor()
+    return self.startEnd(
+      lambda: self._motor.set(self._constants.kRollerMotorScoreSpeed),
+      lambda: self._motor.stopMotor()
     ).withName("Roller:Score")
   
   def isIntakeHolding(self) -> bool:
@@ -45,5 +44,5 @@ class Roller(Subsystem):
     self._motor.stopMotor()
 
   def _updateTelemetry(self) -> None:
-    SmartDashboard.putNumber("Robot/Roller/Speed", self._motor.get())
     SmartDashboard.putBoolean("Robot/Roller/IsHolding", self.isIntakeHolding())
+    SmartDashboard.putNumber("Robot/Roller/Speed", self._motor.get())
