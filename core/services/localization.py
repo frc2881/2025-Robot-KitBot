@@ -71,7 +71,7 @@ class Localization():
             self._poseEstimator.addVisionMeasurement(
               estimatedRobotPose.estimatedPose.toPose2d(), 
               estimatedRobotPose.timestampSeconds,
-              [stdDevTranslation, stdDevTranslation, stdDevRotation]
+              (stdDevTranslation, stdDevTranslation, stdDevRotation)
             )
     self._robotPose = self._poseEstimator.getEstimatedPosition()
     if hasVisionTarget:
@@ -109,7 +109,9 @@ class Localization():
 
   def getTargetPose(self, targetAlignmentLocation: TargetAlignmentLocation) -> Pose3d:
     target = self._targets.get(utils.getTargetHash(self._robotPose.nearest(self._targetPoses)))
-    return target.pose.transformBy(constants.Game.Field.Targets.kTargetAlignmentTransforms[target.type][targetAlignmentLocation])
+    if target is not None:
+      return target.pose.transformBy(constants.Game.Field.Targets.kTargetAlignmentTransforms[target.type][targetAlignmentLocation])
+    return Pose3d(self._robotPose)
 
   def hasValidVisionTarget(self) -> bool:
     return self._hasValidVisionTarget

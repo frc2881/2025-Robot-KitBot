@@ -77,7 +77,7 @@ class Subsystems:
       translationPID = PID(5.0, 0, 0),
       translationTolerance = Tolerance(0.05, 0.1),
       translationSpeedMax = kTranslationSpeedMax * 0.3,   
-      rotationPID = PID(0.1, 0, 0), # TODO: recalibrate P for target alignment rotation on practice robot
+      rotationPID = PID(0.1, 0, 0),
       rotationTolerance = Tolerance(0.25, 0.5),
       rotationSpeedMax = kRotationSpeedMax * 0.5, 
       rotationHeadingModeOffset = 0,
