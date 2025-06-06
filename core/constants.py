@@ -78,7 +78,7 @@ class Subsystems:
       translationTolerance = Tolerance(0.05, 0.1),
       translationSpeedMax = kTranslationSpeedMax * 0.3,   
       rotationPID = PID(0.1, 0, 0),
-      rotationTolerance = Tolerance(0.25, 0.5),
+      rotationTolerance = Tolerance(0.5, 1.0),
       rotationSpeedMax = kRotationSpeedMax * 0.5, 
       rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180
@@ -177,8 +177,8 @@ class Game:
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-7.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(7.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-13.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(13.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),

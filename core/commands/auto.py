@@ -15,6 +15,11 @@ class AutoPath(Enum):
   Start_2R_2R = auto()
   Intake_B = auto()
   Score_B_2L = auto()
+  Start_3_3L = auto()
+  Intake_3L_B = auto()
+  Score_B_4R = auto()
+  Intake_4R_B = auto()
+  Score_B_4L = auto()
 
 class Auto:
   def __init__(
@@ -41,6 +46,7 @@ class Auto:
     self._autos.setDefaultOption("None", cmd.none)
     
     self._autos.addOption("[2R]", self.auto_2R)
+    self._autos.addOption("[3]", self.auto_3)
 
     self._autos.onChange(lambda auto: self.set(auto()))
     SmartDashboard.putData("Robot/Auto", self._autos)
@@ -74,6 +80,7 @@ class Auto:
     return (
       self._move(autoPath)
       .andThen(self._alignToTarget(targetAlignmentLocation))
+      .andThen(cmd.waitSeconds(0.25))
       .andThen(
         self._robot.game.scoreCoral()
         .alongWith(logger.log_("Auto:ScoreCoral"))
@@ -83,6 +90,7 @@ class Auto:
   def _moveAlignIntake(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._move(autoPath)
+      .andThen(self._alignToTarget(targetAlignmentLocation))
       .andThen(
         self._robot.game.intakeCoral()
         .alongWith(logger.log_("Auto:IntakeCoral"))
@@ -95,4 +103,12 @@ class Auto:
       self._moveAlignIntake(AutoPath.Intake_B, TargetAlignmentLocation.Center),
       self._moveAlignScore(AutoPath.Score_B_2L, TargetAlignmentLocation.Left)
     ).withName("Auto:[2R]")
- 
+  
+  def auto_3(self) -> Command:
+    return cmd.sequence(
+      self._moveAlignScore(AutoPath.Start_3_3L, TargetAlignmentLocation.Left),
+      self._moveAlignIntake(AutoPath.Intake_3L_B, TargetAlignmentLocation.Left), 
+      self._moveAlignScore(AutoPath.Score_B_4R, TargetAlignmentLocation.Right),
+      self._moveAlignIntake(AutoPath.Intake_4R_B, TargetAlignmentLocation.Left),
+      self._moveAlignScore(AutoPath.Score_B_4L, TargetAlignmentLocation.Left)
+    ).withName("Auto:[3]")
