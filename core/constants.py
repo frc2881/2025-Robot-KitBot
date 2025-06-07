@@ -88,6 +88,7 @@ class Subsystems:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
     kRollerMotorScoreSpeed: float = 0.2
+    kRollerMotorHoldSpeed: float = 0.08
 
 class Services:
   class Localization:
@@ -177,8 +178,8 @@ class Game:
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-13.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(13.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-12.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(12.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),

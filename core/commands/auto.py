@@ -80,7 +80,7 @@ class Auto:
     return (
       self._move(autoPath)
       .andThen(self._alignToTarget(targetAlignmentLocation))
-      .andThen(cmd.waitSeconds(0.25))
+      .raceWith(self._robot.roller.hold())
       .andThen(
         self._robot.game.scoreCoral()
         .alongWith(logger.log_("Auto:ScoreCoral"))

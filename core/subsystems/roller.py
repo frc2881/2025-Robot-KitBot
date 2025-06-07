@@ -28,6 +28,8 @@ class Roller(Subsystem):
       )
     )
 
+    self.setDefaultCommand(self.hold())
+
   def periodic(self) -> None:
     self._updateTelemetry()
 
@@ -36,6 +38,12 @@ class Roller(Subsystem):
       lambda: self._motor.set(self._constants.kRollerMotorScoreSpeed),
       lambda: self._motor.stopMotor()
     ).withName("Roller:Score")
+  
+  def hold(self) -> Command:
+    return self.runEnd(
+      lambda: self._motor.set(self._constants.kRollerMotorHoldSpeed if self.isIntakeHolding() else 0),
+      lambda: self._motor.stopMotor()
+    ).withName("Roller:Hold")
   
   def isIntakeHolding(self) -> bool:
     return self._intakeSensorHasTarget()
