@@ -66,24 +66,24 @@ class Auto:
   def _move(self, path: AutoPath) -> Command:
     return (
       AutoBuilder.followPath(self._paths.get(path))
-      .alongWith(logger.log_(f'Auto:Move:{path.name}'))
+      .deadlineWith(logger.log_(f'Auto:Move:{path.name}'))
     )
 
   def _alignToTarget(self, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._robot.game.alignRobotToTarget(TargetAlignmentMode.Translation, targetAlignmentLocation)
       .withTimeout(constants.Game.Commands.kAutoTargetAlignmentTimeout)
-      .alongWith(logger.log_(f'Auto:AlignToTarget:{targetAlignmentLocation.name}'))
+      .deadlineWith(logger.log_(f'Auto:AlignToTarget:{targetAlignmentLocation.name}'))
     )
 
   def _moveAlignScore(self, autoPath: AutoPath, targetAlignmentLocation: TargetAlignmentLocation) -> Command:
     return (
       self._move(autoPath)
       .andThen(self._alignToTarget(targetAlignmentLocation))
-      .raceWith(self._robot.roller.hold())
+      .deadlineWith(self._robot.roller.hold())
       .andThen(
         self._robot.game.scoreCoral()
-        .alongWith(logger.log_("Auto:ScoreCoral"))
+        .deadlineWith(logger.log_("Auto:ScoreCoral"))
       )
     )
 
@@ -93,7 +93,7 @@ class Auto:
       .andThen(self._alignToTarget(targetAlignmentLocation))
       .andThen(
         self._robot.game.intakeCoral()
-        .alongWith(logger.log_("Auto:IntakeCoral"))
+        .deadlineWith(logger.log_("Auto:IntakeCoral"))
       )
     )
 

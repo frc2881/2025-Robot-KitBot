@@ -78,7 +78,7 @@ class Subsystems:
       translationTolerance = Tolerance(0.05, 0.1),
       translationSpeedMax = kTranslationSpeedMax * 0.3,   
       rotationPID = PID(0.1, 0, 0),
-      rotationTolerance = Tolerance(0.5, 1.0),
+      rotationTolerance = Tolerance(2.0, 4.0),
       rotationSpeedMax = kRotationSpeedMax * 0.5, 
       rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180
@@ -87,7 +87,7 @@ class Subsystems:
   class Roller:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorScoreSpeed: float = 0.2
+    kRollerMotorScoreSpeed: float = 0.3
     kRollerMotorHoldSpeed: float = 0.08
 
 class Services:
