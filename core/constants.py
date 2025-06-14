@@ -87,7 +87,7 @@ class Subsystems:
   class Roller:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorScoreSpeed: float = 0.3
+    kRollerMotorScoreSpeed: float = 0.2
     kRollerMotorHoldSpeed: float = 0.08
 
 class Services:
