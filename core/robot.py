@@ -59,7 +59,7 @@ class RobotCore:
     # self.driver.rightStick().whileTrue(cmd.none())
     self.driver.leftStick().whileTrue(self.drive.lock())
     self.driver.rightTrigger().whileTrue(self.game.scoreCoral())
-    # self.driver.leftTrigger().whileTrue(cmd.none())
+    self.driver.leftTrigger().whileTrue(self.roller.resetCoral())
     self.driver.rightBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Right))
     self.driver.leftBumper().whileTrue(self.game.alignRobotToTarget(TargetAlignmentMode.Translation, TargetAlignmentLocation.Left))
     # self.driver.povUp().whileTrue(cmd.none())

@@ -39,6 +39,12 @@ class Roller(Subsystem):
       lambda: self._motor.stopMotor()
     ).withName("Roller:Score")
   
+  def resetCoral(self) -> Command:
+    return self.startEnd(
+      lambda: self._motor.set(self._constants.kRollerMotorResetSpeed),
+      lambda: self._motor.stopMotor()
+    ).withName("Roller:Reset")
+  
   def hold(self) -> Command:
     return self.runEnd(
       lambda: self._motor.set(self._constants.kRollerMotorHoldSpeed if self.isIntakeHolding() else 0),

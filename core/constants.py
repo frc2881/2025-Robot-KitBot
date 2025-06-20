@@ -87,7 +87,8 @@ class Subsystems:
   class Roller:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorScoreSpeed: float = 0.2
+    kRollerMotorScoreSpeed: float = 0.25
+    kRollerMotorResetSpeed: float = -0.2
     kRollerMotorHoldSpeed: float = 0.08
 
 class Services:
@@ -143,7 +144,7 @@ class Controllers:
 class Game: 
   class Commands:
     kScoreEndingDelay: units.seconds = 0.5
-    kAutoTargetAlignmentTimeout: units.seconds = 3.0
+    kAutoTargetAlignmentTimeout: units.seconds = 1.5
 
   class Field:
     kAprilTagFieldLayout = APRIL_TAG_FIELD_LAYOUT
@@ -182,8 +183,8 @@ class Game:
           TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(12.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(22), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(22), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(22), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(21), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(21), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(21), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
         }
       }
