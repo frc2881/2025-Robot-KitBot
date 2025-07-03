@@ -13,13 +13,19 @@ import core.constants as constants
 
 class AutoPath(Enum):
   Start_2R_2R = auto()
-  Intake_B = auto()
-  Score_B_2L = auto()
+  Start_2L_2L = auto()
   Start_3_3L = auto()
   Intake_3L_B = auto()
   Score_B_4R = auto()
   Intake_4R_B = auto()
   Score_B_4L = auto()
+  Start_1_1R = auto()
+  Intake_1R_A = auto()
+  Score_A_6L = auto()
+  Intake_6L_A = auto()
+  Score_A_6R = auto()
+  Move_2R_A = auto()
+  Move_2L_B = auto()
 
 class Auto:
   def __init__(
@@ -45,6 +51,8 @@ class Auto:
     self._autos = SendableChooser()
     self._autos.setDefaultOption("None", cmd.none)
     
+    self._autos.addOption("[1]", self.auto_1)
+    self._autos.addOption("[2L]", self.auto_2L)
     self._autos.addOption("[2R]", self.auto_2R)
     self._autos.addOption("[3]", self.auto_3)
 
@@ -97,11 +105,27 @@ class Auto:
       )
     )
 
+  def auto_1(self) -> Command:
+    return cmd.sequence(
+      self._moveAlignScore(AutoPath.Start_1_1R, TargetAlignmentLocation.Right),
+      self._moveAlignIntake(AutoPath.Intake_1R_A, TargetAlignmentLocation.Right), 
+      self._moveAlignScore(AutoPath.Score_A_6L, TargetAlignmentLocation.Left),
+      self._moveAlignIntake(AutoPath.Intake_6L_A, TargetAlignmentLocation.Right),
+      self._moveAlignScore(AutoPath.Score_A_6R, TargetAlignmentLocation.Right)
+    ).withName("Auto:[1]")
+
+  def auto_2L(self) -> Command:
+    return cmd.sequence(
+      self._moveAlignScore(AutoPath.Start_2L_2L, TargetAlignmentLocation.Left),
+      cmd.waitSeconds(3.0),
+      self._move(AutoPath.Move_2L_B)
+    ).withName("Auto:[2L]")
+
   def auto_2R(self) -> Command:
     return cmd.sequence(
       self._moveAlignScore(AutoPath.Start_2R_2R, TargetAlignmentLocation.Right),
-      self._moveAlignIntake(AutoPath.Intake_B, TargetAlignmentLocation.Center),
-      self._moveAlignScore(AutoPath.Score_B_2L, TargetAlignmentLocation.Left)
+      cmd.waitSeconds(3.0),
+      self._move(AutoPath.Move_2R_A)
     ).withName("Auto:[2R]")
   
   def auto_3(self) -> Command:

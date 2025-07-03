@@ -76,10 +76,10 @@ class Subsystems:
     kTargetAlignmentConstants = TargetAlignmentConstants(
       translationPID = PID(5.0, 0, 0),
       translationTolerance = Tolerance(0.05, 0.1),
-      translationSpeedMax = kTranslationSpeedMax * 0.3,   
+      translationSpeedMax = kTranslationSpeedMax * 0.25,   
       rotationPID = PID(0.1, 0, 0),
       rotationTolerance = Tolerance(2.0, 4.0),
-      rotationSpeedMax = kRotationSpeedMax * 0.5, 
+      rotationSpeedMax = kRotationSpeedMax * 0.4, 
       rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180
     )
@@ -117,23 +117,23 @@ class Sensors:
       PoseSensorConfig(
         "Front",
         Transform3d(
-          Translation3d(units.inchesToMeters(13.75), units.inchesToMeters(0), units.inchesToMeters(13.03)),
-          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(12.9), units.degreesToRadians(0))
+          Translation3d(units.inchesToMeters(9.0), units.inchesToMeters(1.5), units.inchesToMeters(18.5)),
+          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(11.0), units.degreesToRadians(0))
         ), _poseSensorConstants
       ),
       PoseSensorConfig(
         "Rear",
         Transform3d(
-          Translation3d(units.inchesToMeters(-13.60), units.inchesToMeters(-6.40), units.inchesToMeters(24.60)),
-          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-39.1), units.degreesToRadians(180.0))
+          Translation3d(units.inchesToMeters(-13.0), units.inchesToMeters(-6.5), units.inchesToMeters(27.75)),
+          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-10.0), units.degreesToRadians(180.0))
         ), _poseSensorConstants
       ),
     )
 
   class Camera:
     kStreams: dict[str, str] = {
-      "Front": "http://10.28.81.6:1182/?action=stream",
-      "Driver": "http://10.28.81.6:1184/?action=stream"
+      "Front": "http://10.99.91.6:1184/?action=stream",
+      "Driver": "http://10.99.91.6:1184/?action=stream"
     }
 
 class Controllers:
@@ -178,13 +178,13 @@ class Game:
 
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(-12.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15.5), units.inchesToMeters(12.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(16.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(16.5), units.inchesToMeters(-10.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(16.5), units.inchesToMeters(10.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(21), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(21), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(21), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(15), units.inchesToMeters(-24), 0, Rotation3d(Rotation2d.fromDegrees(180))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(15), units.inchesToMeters(24), 0, Rotation3d(Rotation2d.fromDegrees(180)))
         }
       }
