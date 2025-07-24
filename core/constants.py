@@ -35,7 +35,7 @@ class Subsystems:
     kTrackWidth: units.meters = units.inchesToMeters(21.5)
     kWheelBase: units.meters = units.inchesToMeters(24.5)
 
-    kTranslationSpeedMax: units.meters_per_second = 4.8
+    kTranslationSpeedMax: units.meters_per_second = 4.46
     kRotationSpeedMax: units.radians_per_second = 4 * math.pi
 
     kInputLimitDemo: units.percent = 0.5
@@ -46,7 +46,7 @@ class Subsystems:
       wheelBevelGearTeeth = 45,
       wheelSpurGearTeeth = 22,
       wheelBevelPinionTeeth = 15,
-      drivingMotorPinionTeeth = 14,
+      drivingMotorPinionTeeth = 13,
       drivingMotorFreeSpeed = 5676,
       drivingMotorControllerType = SparkLowLevel.SparkModel.kSparkMax,
       drivingMotorType = SparkLowLevel.MotorType.kBrushless,
