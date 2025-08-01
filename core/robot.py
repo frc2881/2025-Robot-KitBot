@@ -10,6 +10,7 @@ from core.commands.auto import Auto
 from core.commands.game import Game
 from core.subsystems.drive import Drive
 from core.subsystems.roller import Roller
+from core.subsystems.climber import Climber
 from core.services.localization import Localization
 from core.classes import TargetAlignmentLocation
 import core.constants as constants
@@ -33,6 +34,7 @@ class RobotCore:
   def _initSubsystems(self) -> None:
     self.drive = Drive(self.gyro.getHeading)
     self.roller = Roller(self.intakeSensor.hasTarget)
+    self.climber = Climber()
     
   def _initServices(self) -> None:
     self.localization = Localization(
@@ -66,8 +68,8 @@ class RobotCore:
     # self.driver.povDown().whileTrue(cmd.none())
     # self.driver.povLeft().whileTrue(cmd.none())
     # self.driver.povRight().whileTrue(cmd.none())
-    # self.driver.a().whileTrue(cmd.none())
-    # self.driver.b().whileTrue(cmd.none())
+    self.driver.a().whileTrue(self.climber.climb())
+    self.driver.b().whileTrue(self.climber.resetClimb())
     # self.driver.y().whileTrue(cmd.none())
     # self.driver.x().whileTrue(cmd.none())
     # self.driver.start().onTrue(cmd.none())
