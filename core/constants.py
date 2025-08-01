@@ -94,8 +94,8 @@ class Subsystems:
   class Climber:
     kClimberMotorCANId: int = 11
     kClimberMotorCurrentLimit: int = 60
-    kClimberMotorClimbSpeed: float = 0.2
-    kClimberMotorResetSpeed: float = -0.2
+    kClimberMotorClimbUpSpeed: float = 0.2
+    kClimberMotorClimbDownSpeed: float = -0.2
 
 class Services:
   class Localization:

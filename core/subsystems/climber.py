@@ -28,17 +28,17 @@ class Climber(Subsystem):
   def periodic(self) -> None:
     self._updateTelemetry()
 
-  def climb(self) -> Command:
+  def climbUp(self) -> Command:
     return self.startEnd(
-      lambda: self._motor.set(self._constants.kClimberMotorClimbSpeed),
+      lambda: self._motor.set(self._constants.kClimberMotorClimbUpSpeed),
       lambda: self._motor.stopMotor()
-    ).withName("Climber:Climb")
+    ).withName("Climber:ClimbUp")
   
-  def resetClimb(self) -> Command:
+  def climbDown(self) -> Command:
     return self.startEnd(
-      lambda: self._motor.set(self._constants.kClimberMotorResetSpeed),
+      lambda: self._motor.set(self._constants.kClimberMotorClimbDownSpeed),
       lambda: self._motor.stopMotor()
-    ).withName("Climber:Reset")
+    ).withName("Climber:ClimbDown")
   
   def reset(self) -> None:
     self._motor.stopMotor()
