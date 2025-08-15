@@ -134,5 +134,7 @@ class Auto:
       self._moveAlignIntake(AutoPath.Intake_3L_B, TargetAlignmentLocation.Left), 
       self._moveAlignScore(AutoPath.Score_B_4R, TargetAlignmentLocation.Right),
       self._moveAlignIntake(AutoPath.Intake_4R_B, TargetAlignmentLocation.Left),
+      self._moveAlignScore(AutoPath.Score_B_4L, TargetAlignmentLocation.Left),
+      self._moveAlignIntake(AutoPath.Intake_4R_B, TargetAlignmentLocation.Left),
       self._moveAlignScore(AutoPath.Score_B_4L, TargetAlignmentLocation.Left)
     ).withName("Auto:[3]")

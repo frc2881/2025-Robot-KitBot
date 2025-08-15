@@ -94,8 +94,8 @@ class Subsystems:
   class Climber:
     kClimberMotorCANId: int = 11
     kClimberMotorCurrentLimit: int = 60
-    kClimberMotorClimbUpSpeed: float = 0.8
-    kClimberMotorClimbDownSpeed: float = -0.5
+    kClimberMotorClimbUpSpeed: float = -0.9
+    kClimberMotorClimbDownSpeed: float = 0.5
 
 class Services:
   class Localization:
@@ -127,13 +127,13 @@ class Sensors:
           Rotation3d(units.degreesToRadians(0), units.degreesToRadians(11.0), units.degreesToRadians(0))
         ), _poseSensorConstants
       ),
-      PoseSensorConfig(
-        "Rear",
-        Transform3d(
-          Translation3d(units.inchesToMeters(-13.0), units.inchesToMeters(-6.5), units.inchesToMeters(27.75)),
-          Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-10.0), units.degreesToRadians(180.0))
-        ), _poseSensorConstants
-      ),
+      # PoseSensorConfig(
+      #   "Rear",
+      #   Transform3d(
+      #     Translation3d(units.inchesToMeters(-13.0), units.inchesToMeters(-6.5), units.inchesToMeters(27.75)),
+      #     Rotation3d(units.degreesToRadians(0), units.degreesToRadians(-10.0), units.degreesToRadians(180.0))
+      #   ), _poseSensorConstants
+      # )
     )
 
   class Camera:
