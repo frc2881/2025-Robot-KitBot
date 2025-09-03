@@ -36,7 +36,7 @@ class Subsystems:
     kWheelBase: units.meters = units.inchesToMeters(24.5)
 
     kTranslationSpeedMax: units.meters_per_second = 4.46
-    kRotationSpeedMax: units.radians_per_second = 4 * math.pi
+    kRotationSpeedMax: units.degrees_per_second = 720.0
 
     kInputLimitDemo: units.percent = 0.5
     kInputRateLimitDemo: units.percent = 0.33
@@ -57,10 +57,10 @@ class Subsystems:
     )
 
     kSwerveModuleConfigs: tuple[SwerveModuleConfig, ...] = (
-      SwerveModuleConfig(SwerveModuleLocation.FrontLeft, 2, 3, -math.pi / 2, Translation2d(kWheelBase / 2, kTrackWidth / 2), _swerveModuleConstants),
+      SwerveModuleConfig(SwerveModuleLocation.FrontLeft, 2, 3, -90, Translation2d(kWheelBase / 2, kTrackWidth / 2), _swerveModuleConstants),
       SwerveModuleConfig(SwerveModuleLocation.FrontRight, 4, 5, 0, Translation2d(kWheelBase / 2, -kTrackWidth / 2), _swerveModuleConstants),
-      SwerveModuleConfig(SwerveModuleLocation.RearLeft, 6, 7, math.pi, Translation2d(-kWheelBase / 2, kTrackWidth / 2), _swerveModuleConstants),
-      SwerveModuleConfig(SwerveModuleLocation.RearRight, 8, 9, math.pi / 2, Translation2d(-kWheelBase / 2, -kTrackWidth / 2), _swerveModuleConstants)
+      SwerveModuleConfig(SwerveModuleLocation.RearLeft, 6, 7, 180, Translation2d(-kWheelBase / 2, kTrackWidth / 2), _swerveModuleConstants),
+      SwerveModuleConfig(SwerveModuleLocation.RearRight, 8, 9, 90, Translation2d(-kWheelBase / 2, -kTrackWidth / 2), _swerveModuleConstants)
     )
 
     kDriveKinematics = SwerveDrive4Kinematics(*(c.translation for c in kSwerveModuleConfigs))
@@ -76,12 +76,12 @@ class Subsystems:
     kTargetAlignmentConstants = TargetAlignmentConstants(
       translationPID = PID(5.0, 0, 0),
       translationTolerance = Tolerance(0.05, 0.1),
-      translationSpeedMax = kTranslationSpeedMax * 0.2,   
-      rotationPID = PID(0.1, 0, 0),
-      rotationTolerance = Tolerance(2.0, 4.0),
-      rotationSpeedMax = kRotationSpeedMax * 0.2, 
+      translationSpeedMax = 1.0,
+      rotationPID = PID(5.0, 0, 0), 
+      rotationTolerance = Tolerance(0.5, 1.0),
+      rotationSpeedMax = 90.0, 
       rotationHeadingModeOffset = 0,
-      rotationTranslationModeOffset = 180
+      rotationTranslationModeOffset = 180.0
     )
 
   class Roller:
@@ -184,9 +184,9 @@ class Game:
 
       kTargetAlignmentTransforms: dict[TargetType, dict[TargetAlignmentLocation, Transform3d]] = {
         TargetType.Reef: {
-          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(16.5), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(16.5), units.inchesToMeters(-10.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
-          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(16.5), units.inchesToMeters(10.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
+          TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(17), 0, 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Left: Transform3d(units.inchesToMeters(17), units.inchesToMeters(-10.0), 0, Rotation3d(Rotation2d.fromDegrees(0))),
+          TargetAlignmentLocation.Right: Transform3d(units.inchesToMeters(17), units.inchesToMeters(10.0), 0, Rotation3d(Rotation2d.fromDegrees(0)))
         },
         TargetType.CoralStation: {
           TargetAlignmentLocation.Center: Transform3d(units.inchesToMeters(15), 0, 0, Rotation3d(Rotation2d.fromDegrees(180))),
