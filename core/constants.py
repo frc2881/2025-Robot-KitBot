@@ -74,13 +74,13 @@ class Subsystems:
     )
 
     kTargetAlignmentConstants = TargetAlignmentConstants(
-      translationPID = PID(5.0, 0, 0),
-      translationMaxVelocity = 1.0,
-      translationMaxAcceleration = 0.5,
+      translationPID = PID(4.0, 0, 0),
+      translationMaxVelocity = 2.0,
+      translationMaxAcceleration = 1.0,
       translationTolerance = Tolerance(0.05, 0.1),
-      rotationPID = PID(5.0, 0, 0), 
-      rotationMaxVelocity = 180.0,
-      rotationMaxAcceleration = 90.0,
+      rotationPID = PID(4.0, 0, 0), 
+      rotationMaxVelocity = 360.0,
+      rotationMaxAcceleration = 180.0,
       rotationTolerance = Tolerance(0.5, 1.0),
       rotationHeadingModeOffset = 0,
       rotationTranslationModeOffset = 180.0
@@ -92,12 +92,6 @@ class Subsystems:
     kRollerMotorScoreSpeed: float = 0.25
     kRollerMotorResetSpeed: float = -0.2
     kRollerMotorHoldSpeed: float = 0.08
-
-  class Climber:
-    kClimberMotorCANId: int = 11
-    kClimberMotorCurrentLimit: int = 60
-    kClimberMotorClimbUpSpeed: float = -0.9
-    kClimberMotorClimbDownSpeed: float = 0.5
 
 class Services:
   class Localization:

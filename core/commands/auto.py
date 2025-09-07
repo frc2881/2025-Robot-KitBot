@@ -111,6 +111,8 @@ class Auto:
       self._moveAlignIntake(AutoPath.Intake_1R_A, TargetAlignmentLocation.Right), 
       self._moveAlignScore(AutoPath.Score_A_6L, TargetAlignmentLocation.Left),
       self._moveAlignIntake(AutoPath.Intake_6L_A, TargetAlignmentLocation.Right),
+      self._moveAlignScore(AutoPath.Score_A_6R, TargetAlignmentLocation.Right),
+      self._moveAlignIntake(AutoPath.Intake_6L_A, TargetAlignmentLocation.Right),
       self._moveAlignScore(AutoPath.Score_A_6R, TargetAlignmentLocation.Right)
     ).withName("Auto:[1]")
 
