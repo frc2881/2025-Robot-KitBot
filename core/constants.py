@@ -87,10 +87,7 @@ class Subsystems:
   class Roller:
     kRollerMotorCANId: int = 10
     kRollerMotorCurrentLimit: int = 60
-    kRollerMotorScoreSpeed: float = 0.25
-    kRollerMotorResetSpeed: float = -0.2
-    kRollerMotorHoldSpeed: float = 0.08
-
+    
   class Climber:
     kClimberMotorCANId: int = 11
     kClimberMotorCurrentLimit: int = 60
